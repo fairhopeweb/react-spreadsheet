@@ -31,7 +31,7 @@ export interface IDimensions {
 export interface IStoreState<Cell> {
   data: Matrix<Cell>;
   selected: PointSet;
-  copied: PointMap<Cell>;
+  copied: PointMap<boolean>;
   hasPasted: boolean;
   cut: boolean;
   active: IPoint | null;
@@ -48,7 +48,7 @@ export type getValue<Cell, Value> = (_: ICellDescriptor<Cell>) => Value;
 
 export type getBindingsForCell<Cell> = (cell: Cell) => IPoint[];
 
-type CellChange<CellType> = {
+export type CellChange<CellType> = {
   prevCell: CellType | null;
   nextCell: CellType | null;
 };
@@ -60,7 +60,7 @@ export interface ICellComponentProps<Cell, Value> extends IPoint {
   getValue: getValue<Cell, Value>;
 }
 
-export type DataViewer<Cell, Value> = React.Component<
+export type DataViewer<Cell, Value> = React.FC<
   ICellComponentProps<Cell, Value>
 >;
 

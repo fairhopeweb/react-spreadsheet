@@ -1,14 +1,13 @@
-import React, {PureComponent, SyntheticEvent} from "react";
+import React, { PureComponent, SyntheticEvent } from "react";
 import classnames from "classnames";
-import {connect} from "unistore/react";
+import { connect } from "unistore/react";
 
 import * as PointSet from "./point-set";
 import * as PointMap from "./point-map";
 import * as Matrix from "./matrix";
 import * as Types from "./types";
-import {DataViewer, IDimensions, IPoint} from "./types";
 import * as Actions from "./actions";
-import {getOffsetRect, isActive} from "./util";
+import { getOffsetRect, isActive } from "./util";
 
 type StaticProps<Data, Value> = {
   row: number;
@@ -31,20 +30,14 @@ type State<Data> = {
 };
 
 type Handlers = {
-  select: (cellPointer: IPoint) => void;
-  activate: (cellPointer: IPoint) => void;
-  setCellDimensions: (point: IPoint, dimensions: IDimensions) => void;
+  select: (cellPointer: Types.IPoint) => void;
+  activate: (cellPointer: Types.IPoint) => void;
+  setCellDimensions: (point: Types.IPoint, dimensions: Types.IDimensions) => void;
 };
 
 type Props<Data, Value> = StaticProps<Data, Value> & State<Data> & Handlers;
 
-export class Cell<
-  Data extends
-    | { readOnly?: boolean; DataViewer: DataViewer<any, any> }
-    | null
-    | undefined,
-  Value
-> extends PureComponent<Props<Data, Value>> {
+export class Cell<Data extends Types.CellBase, Value> extends PureComponent<Props<Data, Value>> {
   /** @todo update to new API */
   root: HTMLElement | null;
 
@@ -57,7 +50,7 @@ export class Cell<
     this.root = root;
   };
 
-  handleMouseDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  handleMouseDown = (e: React.MouseEvent<HTMLTableCellElement>) => {
     const {
       row,
       column,
@@ -148,7 +141,7 @@ function mapStateToProps<Data>(
   const point = { row, column };
   const cellIsActive = isActive(active, point);
 
-  const cellBindings: = PointMap.get(point, bindings);
+  const cellBindings = PointMap.get(point, bindings);
 
   return {
     active: cellIsActive,

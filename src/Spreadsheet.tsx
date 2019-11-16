@@ -11,7 +11,7 @@ import * as Types from "./types";
 import { IStoreState } from "./types";
 import Table, { Props as TableProps } from "./Table";
 import Row, { Props as RowProps } from "./Row";
-import { Cell, enhance as enhanceCell, Props as CellProps } from "./Cell";
+import { enhance as enhanceCell, Props as CellProps } from "./Cell";
 import DataViewer from "./DataViewer";
 import DataEditor from "./DataEditor";
 import ActiveCell from "./ActiveCell";
@@ -34,20 +34,20 @@ const getValue = ({ data }: { data?: DefaultCellType }) =>
 export type Props<CellType, Value> = {
   data: Matrix.Matrix<CellType>;
   columnLabels?: string[];
-  ColumnIndicator?: React.Component<ColumnIndicatorProps>;
+  ColumnIndicator?: React.FC<ColumnIndicatorProps>;
   rowLabels?: string[];
-  RowIndicator?: React.Component<RowIndicatorProps>;
+  RowIndicator?: React.FC<RowIndicatorProps>;
   hideRowIndicators?: boolean;
   hideColumnIndicators?: boolean;
-  Table: React.Component<TableProps>;
-  Row: React.Component<RowProps>;
-  Cell: React.Component<CellProps<CellType, Value>>;
+  Table: React.FC<TableProps>;
+  Row: React.FC<RowProps>;
+  Cell: React.FC<CellProps<CellType, Value>>;
   DataViewer: Types.DataViewer<CellType, Value>;
   DataEditor: Types.DataEditor<CellType, Value>;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   getValue: Types.getValue<CellType, Value>;
   getBindingsForCell: Types.getBindingsForCell<CellType>;
-  store: Store;
+  store: Store<any>;
 };
 
 type Handlers = {
@@ -69,10 +69,13 @@ type State = {
 
 type ColumnIndicatorProps = {
   column: number;
-  label?: React.ReactChildren | null;
+  label?: string | null;
 };
 
-const DefaultColumnIndicator = ({ column, label }: ColumnIndicatorProps) =>
+const DefaultColumnIndicator: React.FC<ColumnIndicatorProps> = ({
+  column,
+  label
+}: ColumnIndicatorProps) =>
   label !== undefined ? (
     <th>{label}</th>
   ) : (
@@ -81,10 +84,13 @@ const DefaultColumnIndicator = ({ column, label }: ColumnIndicatorProps) =>
 
 type RowIndicatorProps = {
   row: number;
-  label?: React.ReactChildren | null;
+  label?: string | null;
 };
 
-const DefaultRowIndicator = ({ row, label }: RowIndicatorProps) =>
+const DefaultRowIndicator: React.FC<RowIndicatorProps> = ({
+  row,
+  label
+}: RowIndicatorProps) =>
   label !== undefined ? <th>{label}</th> : <th>{row + 1}</th>;
 
 interface SpreadsheetProps<CellType, Value>
@@ -101,7 +107,7 @@ class Spreadsheet<CellType, Value> extends React.Component<
     Table,
     Row,
     /** @todo enhance incoming Cell prop */
-    Cell: enhanceCell(Cell),
+    Cell: enhanceCell,
     DataViewer,
     DataEditor,
     getValue,
@@ -132,7 +138,7 @@ class Spreadsheet<CellType, Value> extends React.Component<
       if (value === undefined) {
         return "";
       }
-      return getValue({ ...point, data: value });
+      return getValue({ ...point, data: value as CellType });
     }, slicedMatrix);
     const csv = Matrix.join(valueMatrix);
     this._clippedText = csv;
@@ -196,7 +202,7 @@ class Spreadsheet<CellType, Value> extends React.Component<
     this.formulaParser.on(
       "callCellValue",
       (
-        cellCoord,
+        cellCoord: any,
         done: (
           _: string | boolean | number | boolean | null | undefined
         ) => void
@@ -209,7 +215,7 @@ class Spreadsheet<CellType, Value> extends React.Component<
             cellCoord.column.index,
             store.getState().data
           );
-          value = getValue({ data: cell });
+          value = getValue({ data: cell as DefaultCellType });
         } catch (error) {
           console.error(error);
         } finally {
@@ -219,7 +225,11 @@ class Spreadsheet<CellType, Value> extends React.Component<
     );
     this.formulaParser.on(
       "callRangeValue",
-      (startCellCoord: any, endCellCoord: any, done: (_: string) => void) => {
+      (
+        startCellCoord: any,
+        endCellCoord: any,
+        done: (_?: (string | number | boolean | null)[]) => void
+      ) => {
         const startPoint = {
           row: startCellCoord.row.index,
           column: startCellCoord.column.index
@@ -231,6 +241,7 @@ class Spreadsheet<CellType, Value> extends React.Component<
         const values = Matrix.toArray(
           Matrix.slice(startPoint, endPoint, store.getState().data)
         ).map((cell: any) => getValue({ data: cell }));
+
         done(values);
       }
     );
@@ -256,7 +267,7 @@ class Spreadsheet<CellType, Value> extends React.Component<
     document.removeEventListener("mouseup", this.handleMouseUp);
   };
 
-  handleMouseMove = (event: MouseEvent) => {
+  handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!this.props.store.getState().dragging && event.buttons === 1) {
       this.props.onDragStart && this.props.onDragStart();
       document.addEventListener("mouseup", this.handleMouseUp);

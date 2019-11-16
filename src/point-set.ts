@@ -13,8 +13,8 @@ export interface IDescriptor<T> extends IPoint {
 }
 
 /** Appends a new IPoint to the Set object */
-export const add = (set: PointSet, IPoint: IPoint): PointSet =>
-  PointMap.set(IPoint, true, set);
+export const add = (set: PointSet, point: IPoint): PointSet =>
+  PointMap.set(point, true, set);
 
 /** Removes the IPoint from the Set object */
 export const remove = (set: PointSet, IPoint: IPoint): PointSet =>
@@ -69,7 +69,6 @@ export function min(set: PointSet): IPoint {
 }
 
 const maxKey = (object: { [key: number]: any }): number =>
-  // $FlowFixMe
   Math.max(...(Object.keys(object) as any));
 
 /** Returns the IPoint on the maximal row in the maximal column in the set */

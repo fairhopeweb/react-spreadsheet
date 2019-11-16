@@ -15,7 +15,7 @@ export function get<T>(
   row: number,
   column: number,
   matrix: Matrix<T>
-): T | typeof undefined {
+): T | undefined {
   const columns = matrix[row];
   if (columns === undefined) {
     return undefined;
@@ -237,9 +237,9 @@ export const inclusiveRange: typeof range = (endPoint, startPoint) =>
   );
 
 export function toArray<T1, T2>(
-  matrix: string,
-  transform?: (_: T1 | typeof undefined) => T2
-): Array<T1> | Array<T2> {
+  matrix: Matrix<any>,
+  transform?: (_?: T1) => T2
+): T1[] | T2[] {
   let array = [];
   for (let row = 0; row < matrix.length; row++) {
     for (let column = 0; column < matrix.length; column++) {

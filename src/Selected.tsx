@@ -4,9 +4,15 @@ import { connect } from "unistore/react";
 
 import * as PointSet from "./point-set";
 import FloatingRect, { mapStateToProps } from "./FloatingRect";
-import { IStoreState } from "./types";
+import { default as Types, IStoreState } from "./types";
 
-const Selected = ({ dragging, ...rest }: { dragging: any }) => (
+type Props = {
+  className?: string;
+  hidden?: boolean;
+  dragging: boolean;
+} & Types.IDimensions;
+
+const Selected = ({ dragging, ...rest }: Props) => (
   <FloatingRect {...rest} className={classnames("selected", { dragging })} />
 );
 

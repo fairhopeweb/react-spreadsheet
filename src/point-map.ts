@@ -57,13 +57,11 @@ export function has<T>(point: Types.IPoint, map: PointMap<T>): boolean {
 
 export function getRow<T>(row: number, map: PointMap<T>): T[] {
   return row in map
-    ? // $FlowFixMe
-    Object.keys(map[row]).map((column: any) => map[row][column])
+    ? Object.keys(map[row]).map((column: any) => map[row][column])
     : [];
 }
 
 export function getColumn<T>(column: number, map: PointMap<T>): T[] {
-  // $FlowFixMe
   return Object.keys(map).map((row: any) => map[row][column]);
 }
 
@@ -121,7 +119,7 @@ export function map<T1, T2>(
 
 /** Creates a new map of all values predicate returns truthy for. The predicate is invoked with two arguments: (value, key) */
 export function filter<T>(
-  predicate: (_: T, __:Types.IPoint) => boolean,
+  predicate: (_: T, __: Types.IPoint) => boolean,
   map: PointMap<T>
 ): PointMap<T> {
   return reduce(

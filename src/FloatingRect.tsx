@@ -6,7 +6,7 @@ import { getCellDimensions } from "./util";
 import "./FloatingRect.css";
 
 type Props = {
-  className: string;
+  className?: string;
   hidden?: boolean;
 } & Types.IDimensions;
 

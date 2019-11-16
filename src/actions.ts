@@ -1,15 +1,19 @@
+import { KeyboardEvent } from "react";
 import * as PointSet from "./point-set";
 import * as PointMap from "./point-map";
 import * as Matrix from "./matrix";
 import * as Types from "./types";
-import {isActive, setCell, updateData} from "./util";
+import { isActive, setCell, updateData } from "./util";
 
 type Action = <Cell>(
   state: Types.IStoreState<Cell>,
-  cellPointer: Types.IPoint
+  active?: any,
+  selected?: PointSet.PointSet,
+  bindings?: PointSet.PointSet,
+  cellPointer?: Types.IPoint
 ) => Partial<Types.IStoreState<Cell>> | null;
 
-export const setData: Action = (state, data) => {
+export const setData: Action = (state, data: Matrix.Matrix<any>) => {
   const nextActive =
     state.active && Matrix.has(state.active.row, state.active.column, data)
       ? state.active
@@ -19,7 +23,7 @@ export const setData: Action = (state, data) => {
     state.selected
   );
   const nextBindings = PointMap.map(
-    (bindings) =>
+    bindings =>
       PointSet.filter(
         point => Matrix.has(point.row, point.column, data),
         bindings
@@ -107,7 +111,7 @@ export function copy<T>(state: Types.IStoreState<T>) {
       (acc, point) =>
         PointMap.set<T>(
           point,
-          Matrix.get<T>(point.row, point.column, state.data),
+          Matrix.get<T>(point.row, point.column, state.data) as T,
           acc
         ),
       state.selected,
@@ -136,12 +140,19 @@ export function paste<Cell>(state: Types.IStoreState<Cell>) {
   };
 
   const { data, selected, commit } = PointMap.reduce(
-    (acc: Accumulator, value, { row, column }): any => {
+    (
+      acc: Accumulator,
+      value:
+        | Types.CellChange<Cell>["prevCell"]
+        | Types.CellChange<Cell>["nextCell"],
+      { row, column }
+    ): any => {
       if (!state.active) {
         return acc;
       }
 
-      let commit: Types.IStoreState<Cell>["lastCommit"] = acc.commit || [];
+      let commit: null | Types.IStoreState<Cell>["lastCommit"] =
+        acc.commit || [];
       const nextRow = row - minPoint.row + state.active.row;
       const nextColumn = column - minPoint.column + state.active.column;
 
@@ -161,7 +172,11 @@ export function paste<Cell>(state: Types.IStoreState<Cell>) {
         commit = [
           ...commit,
           {
-            prevCell: Matrix.get(nextRow, nextColumn, nextData),
+            prevCell: Matrix.get(
+              nextRow,
+              nextColumn,
+              nextData
+            ) as Types.CellChange<Cell>["prevCell"],
             nextCell: value
           }
         ];
@@ -176,7 +191,7 @@ export function paste<Cell>(state: Types.IStoreState<Cell>) {
         commit
       };
     },
-    state.copied,
+    state.copied as PointMap.PointMap<any>,
     { data: state.data, selected: PointSet.from([]), commit: [] }
   );
   return {
@@ -189,12 +204,13 @@ export function paste<Cell>(state: Types.IStoreState<Cell>) {
   };
 }
 
-export const edit = <Cell: Types.CellBase>(state: Types.IStoreState<Cell>) => {
+export const edit = <Cell>(state: Types.IStoreState<Cell>) => {
   if (isActiveReadOnly(state)) {
     return null;
   }
+
   return { mode: "edit" };
-}
+};
 
 export const view = () => ({
   mode: "view"
@@ -297,13 +313,13 @@ const keyDownHandlers: KeyDownHandlers<any> = {
   ArrowLeft: go(0, -1),
   ArrowRight: go(0, +1),
   Tab: go(0, +1),
-  Enter: edit,
+  Enter: edit as KeyDownHandler<any>,
   Backspace: clear,
   Escape: blur
 };
 
 const editKeyDownHandlers: KeyDownHandlers<any> = {
-  Escape: view,
+  Escape: view as KeyDownHandler<any>,
   Tab: keyDownHandlers.Tab,
   Enter: keyDownHandlers.ArrowDown
 };
@@ -322,12 +338,10 @@ function getActive<Cell>(state: Types.IStoreState<Cell>): any {
   return (
     state.active &&
     Matrix.get(state.active.row, state.active.column, state.data)
-);
+  );
 }
 
-const isActiveReadOnly = <Cell>(
-  state: Types.IStoreState<Cell>
-): boolean => {
+const isActiveReadOnly = <Cell>(state: Types.IStoreState<Cell>): boolean => {
   const activeCell = getActive(state);
   return Boolean(activeCell && activeCell.readOnly);
 };
@@ -360,7 +374,10 @@ export const getKeyDownHandler = (
   return handlers[key];
 };
 
-export function keyDown(state: Types.IStoreState<any>, event: KeyboardEvent) {
+export function keyDown(
+  state: Types.IStoreState<any>,
+  event: KeyboardEvent<HTMLInputElement>
+) {
   const handler = getKeyDownHandler(state, event);
   if (handler) {
     return handler(state, event);

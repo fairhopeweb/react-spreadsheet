@@ -6,6 +6,11 @@ import * as Actions from "./actions";
 import * as Types from "./types";
 import { getCellDimensions } from "./util";
 
+interface ICell<Cell, Value> {
+  DataEditor: Types.DataEditor<Cell, Value>;
+  readOnly: boolean;
+}
+
 type State<Cell> = {
   cellBeforeUpdate: Cell;
 };
@@ -15,7 +20,7 @@ type Props<Cell, Value> = {
   getValue: Types.getValue<Cell, Value>;
   onChange: (data: Cell) => void;
   setData: (active: Types.IPoint, data: Cell, bindings: Types.IPoint[]) => void;
-  cell: Cell;
+  cell: ICell<Cell, Value>;
   hidden: boolean;
   mode: Types.Mode;
   edit: () => void;
@@ -73,11 +78,12 @@ class ActiveCell<Cell, Value> extends Component<
       edit
     } = this.props;
     DataEditor = (cell && cell.DataEditor) || DataEditor;
+    const readOnly = cell && cell.readOnly;
     return hidden ? null : (
       <div
         className={classnames("ActiveCell", mode)}
         style={{ width, height, top, left }}
-        onClick={mode === "view" ? edit : undefined}
+        onClick={mode === "view" && !readOnly ? edit : undefined}
       >
         {mode === "edit" && (
           <DataEditor
@@ -101,7 +107,6 @@ const mapStateToProps = (state: Types.IStoreState<any>) => {
   return {
     hidden: false,
     ...state.active,
-    // $FlowFixMe
     cell: Matrix.get(state.active.row, state.active.column, state.data),
     width: dimensions.width,
     height: dimensions.height,
