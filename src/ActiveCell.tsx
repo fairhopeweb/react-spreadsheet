@@ -20,7 +20,7 @@ type Props<Cell, Value> = {
   getValue: Types.getValue<Cell, Value>;
   onChange: (data: Cell) => void;
   setData: (active: Types.IPoint, data: Cell, bindings: Types.IPoint[]) => void;
-  cell: ICell<Cell, Value>;
+  cell: Cell;
   hidden: boolean;
   mode: Types.Mode;
   edit: () => void;
@@ -99,7 +99,10 @@ class ActiveCell<Cell, Value> extends Component<
   }
 }
 
-const mapStateToProps = (state: Types.IStoreState<any>) => {
+const mapStateToProps = (
+  state: Types.IStoreState<any>,
+  { DataEditor, getValue, getBindingsForCell }: Props<any, any>
+) => {
   const dimensions = state.active && getCellDimensions(state.active, state);
   if (!state.active || !dimensions) {
     return { hidden: true };
@@ -112,7 +115,10 @@ const mapStateToProps = (state: Types.IStoreState<any>) => {
     height: dimensions.height,
     top: dimensions.top,
     left: dimensions.left,
-    mode: state.mode
+    mode: state.mode,
+    DataEditor,
+    getValue,
+    getBindingsForCell
   };
 };
 

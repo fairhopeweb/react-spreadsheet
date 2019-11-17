@@ -48,12 +48,12 @@ export type getValue<Cell, Value> = (_: ICellDescriptor<Cell>) => Value;
 
 export type getBindingsForCell<Cell> = (cell: Cell) => IPoint[];
 
-export type CellChange<CellType> = {
-  prevCell: CellType | null;
-  nextCell: CellType | null;
+export type CellChange<Cell> = {
+  prevCell?: Cell;
+  nextCell?: Cell;
 };
 
-export type commit<CellType> = (changes: CellChange<CellType>[]) => void;
+export type commit<Cell> = (changes: CellChange<Cell>[]) => void;
 
 export interface ICellComponentProps<Cell, Value> extends IPoint {
   cell?: Cell;

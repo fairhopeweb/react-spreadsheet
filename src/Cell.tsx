@@ -9,7 +9,7 @@ import * as Types from "./types";
 import * as Actions from "./actions";
 import { getOffsetRect, isActive } from "./util";
 
-type StaticProps<Data, Value> = {
+export type StaticProps<Data, Value> = {
   row: number;
   column: number;
   DataViewer: Types.DataViewer<Data, Value>;
@@ -103,7 +103,7 @@ export class Cell<Data extends Types.CellBase, Value> extends PureComponent<
     const { row, column, getValue, formulaParser } = this.props;
     let { DataViewer, data } = this.props;
     if (data && data.DataViewer) {
-      ({ DataViewer, ...data } = data);
+      DataViewer = data.DataViewer;
     }
 
     return (

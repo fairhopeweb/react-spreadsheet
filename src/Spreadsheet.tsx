@@ -11,7 +11,7 @@ import * as Types from "./types";
 import { IStoreState } from "./types";
 import Table, { Props as TableProps } from "./Table";
 import Row, { Props as RowProps } from "./Row";
-import { enhance as enhanceCell, Props as CellProps } from "./Cell";
+import { enhance as enhanceCell, StaticProps as CellProps } from "./Cell";
 import DataViewer from "./DataViewer";
 import DataEditor from "./DataEditor";
 import ActiveCell from "./ActiveCell";

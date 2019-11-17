@@ -8,8 +8,9 @@ type Cell = {
 
 type Value = string | number;
 
-class DataEditor extends React.PureComponent<
-  Types.DataEditorProps<Cell, Value>
+class DataEditor extends React.Component<
+  Types.DataEditorProps<Cell, Value>,
+  void
 > {
   input?: HTMLInputElement;
 
