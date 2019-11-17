@@ -44,7 +44,7 @@ export default class SpreadsheetStateProvider<
   CellType,
   Value
 > extends Component<IProps<CellType, Value>, IStoreState<CellType>> {
-  store: Store<any>;
+  store: Store<IStoreState<CellType>>;
   unsubscribe: Unsubscribe;
   prevState: IStoreState<CellType>;
 
@@ -58,7 +58,7 @@ export default class SpreadsheetStateProvider<
 
   constructor(props: IProps<CellType, Value>) {
     super(props);
-    const state: IStoreState<CellType> = {
+    const state: IStoreState<CellType> | any = {
       ...initialState,
       data: this.props.data
     };
@@ -116,7 +116,10 @@ export default class SpreadsheetStateProvider<
   componentDidUpdate() {
     if (this.props.data !== this.prevState.data) {
       this.store.setState(
-        Actions.setData(this.store.getState(), this.props.data)
+        Actions.setData(this.store.getState(), this.props.data) as Pick<
+          string,
+          any
+        >
       );
     }
   }

@@ -17,8 +17,6 @@ type StaticProps<Data, Value> = {
   formulaParser: any;
 };
 
-export { StaticProps as Props };
-
 type State<Data> = {
   selected: boolean;
   active: boolean;
@@ -32,12 +30,17 @@ type State<Data> = {
 type Handlers = {
   select: (cellPointer: Types.IPoint) => void;
   activate: (cellPointer: Types.IPoint) => void;
-  setCellDimensions: (point: Types.IPoint, dimensions: Types.IDimensions) => void;
+  setCellDimensions: (
+    point: Types.IPoint,
+    dimensions: Types.IDimensions
+  ) => void;
 };
 
 type Props<Data, Value> = StaticProps<Data, Value> & State<Data> & Handlers;
 
-export class Cell<Data extends Types.CellBase, Value> extends PureComponent<Props<Data, Value>> {
+export class Cell<Data extends Types.CellBase, Value> extends PureComponent<
+  Props<Data, Value>
+> {
   /** @todo update to new API */
   root: HTMLElement | null;
 

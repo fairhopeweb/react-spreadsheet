@@ -1,4 +1,4 @@
-import React, { PureComponent } from "react";
+import React from "react";
 import * as Types from "./types";
 import { moveCursorToEnd } from "./util";
 
@@ -8,7 +8,7 @@ type Cell = {
 
 type Value = string | number;
 
-export default class DataEditor extends PureComponent<
+class DataEditor extends React.PureComponent<
   Types.DataEditorProps<Cell, Value>
 > {
   input?: HTMLInputElement;
@@ -36,10 +36,10 @@ export default class DataEditor extends PureComponent<
     const { getValue, column, row, cell } = this.props;
     const value = getValue({ column, row, data: cell }) || "";
     return (
-      <div className="DataEditor">
+      <div className='DataEditor'>
         <input
           ref={this.handleInput}
-          type="text"
+          type='text'
           onChange={this.handleChange}
           value={value}
           autoFocus
@@ -48,3 +48,5 @@ export default class DataEditor extends PureComponent<
     );
   }
 }
+
+export default DataEditor;

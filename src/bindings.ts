@@ -19,7 +19,7 @@ export function getBindingsForCell<Cell>(cell: Cell): Types.IPoint[] {
     return [];
   }
 
-  const { value } = cell;
+  const { value } = cell as Cell & { value: string };
   // Get raw cell references from formula
   const match = value.match(FORMULA_CELL_REFERENCES);
   if (!match) {

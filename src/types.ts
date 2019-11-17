@@ -58,6 +58,7 @@ export type commit<CellType> = (changes: CellChange<CellType>[]) => void;
 export interface ICellComponentProps<Cell, Value> extends IPoint {
   cell?: Cell;
   getValue: getValue<Cell, Value>;
+  formulaParser: any;
 }
 
 export type DataViewer<Cell, Value> = React.FC<

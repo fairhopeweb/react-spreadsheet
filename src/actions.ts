@@ -1,9 +1,9 @@
-import { KeyboardEvent } from "react";
+import {KeyboardEvent} from "react";
 import * as PointSet from "./point-set";
 import * as PointMap from "./point-map";
 import * as Matrix from "./matrix";
 import * as Types from "./types";
-import { isActive, setCell, updateData } from "./util";
+import {isActive, setCell, updateData} from "./util";
 
 type Action = <Cell>(
   state: Types.IStoreState<Cell>,
