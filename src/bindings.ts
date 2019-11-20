@@ -1,6 +1,6 @@
 import { extractLabel } from "hot-formula-parser/lib/helper/cell";
 
-import * as Types from "./types";
+import { IPoint } from "./types";
 
 function isFormulaCell<Cell extends { value?: string }>(cell: Cell): boolean {
   return Boolean(
@@ -14,7 +14,7 @@ function isFormulaCell<Cell extends { value?: string }>(cell: Cell): boolean {
 const FORMULA_CELL_REFERENCES = /\$?[A-Z]+\$?[0-9]+/g;
 
 /** @todo move me */
-export function getBindingsForCell<Cell>(cell: Cell): Types.IPoint[] {
+export function getBindingsForCell<Cell>(cell: Cell): IPoint[] {
   if (!isFormulaCell(cell)) {
     return [];
   }

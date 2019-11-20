@@ -1,4 +1,4 @@
-import React from "react";
+import { Component, FC } from "react";
 
 import { PointMap } from "./point-map";
 import { PointSet } from "./point-set";
@@ -61,14 +61,10 @@ export interface ICellComponentProps<Cell, Value> extends IPoint {
   formulaParser: any;
 }
 
-export type DataViewer<Cell, Value> = React.FC<
-  ICellComponentProps<Cell, Value>
->;
+export type DataViewer<Cell, Value> = FC<ICellComponentProps<Cell, Value>>;
 
 export type DataEditorProps<Cell, Value> = ICellComponentProps<Cell, Value> & {
   onChange: (_: Cell) => void;
 };
 
-export type DataEditor<Cell, Value> = React.Component<
-  DataEditorProps<Cell, Value>
->;
+export type DataEditor<Cell, Value> = Component<DataEditorProps<Cell, Value>>;

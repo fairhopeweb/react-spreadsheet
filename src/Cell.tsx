@@ -1,19 +1,27 @@
-import React, { PureComponent, SyntheticEvent } from "react";
+import React, { MouseEvent, PureComponent, SyntheticEvent } from "react";
 import classnames from "classnames";
 import { connect } from "unistore/react";
 
-import * as PointSet from "./point-set";
-import * as PointMap from "./point-map";
-import * as Matrix from "./matrix";
-import * as Types from "./types";
-import * as Actions from "./actions";
+import { has as hasPointSet } from "./point-set";
+import { get, has as hasPointMap } from "./point-map";
+import { get as getMatrix } from "./matrix";
+import {
+  CellBase,
+  DataViewer,
+  getValue,
+  IDimensions,
+  IPoint,
+  IStoreState,
+  Mode
+} from "./types";
+import { activate, select, setCellDimensions } from "./actions";
 import { getOffsetRect, isActive } from "./util";
 
 export type StaticProps<Data, Value> = {
   row: number;
   column: number;
-  DataViewer: Types.DataViewer<Data, Value>;
-  getValue: Types.getValue<Data, Value>;
+  DataViewer: DataViewer<Data, Value>;
+  getValue: getValue<Data, Value>;
   formulaParser: any;
 };
 
@@ -22,38 +30,30 @@ type State<Data> = {
   active: boolean;
   copied: boolean;
   dragging: boolean;
-  mode: Types.Mode;
+  mode: Mode;
   data?: Data;
   _bindingChanged?: Object;
 };
 
 type Handlers = {
-  select: (cellPointer: Types.IPoint) => void;
-  activate: (cellPointer: Types.IPoint) => void;
-  setCellDimensions: (
-    point: Types.IPoint,
-    dimensions: Types.IDimensions
-  ) => void;
+  select: (cellPointer: IPoint) => void;
+  activate: (cellPointer: IPoint) => void;
+  setCellDimensions: (point: IPoint, dimensions: IDimensions) => void;
 };
 
 type Props<Data, Value> = StaticProps<Data, Value> & State<Data> & Handlers;
 
-export class Cell<Data extends Types.CellBase, Value> extends PureComponent<
+export class Cell<Data extends CellBase, Value> extends PureComponent<
   Props<Data, Value>
 > {
   /** @todo update to new API */
-  root: HTMLElement | null;
-
-  constructor(props: Props<Data, Value>) {
-    super(props);
-    this.root = null;
-  }
+  root: HTMLElement | null = null;
 
   handleRoot = (root: HTMLElement | null) => {
     this.root = root;
   };
 
-  handleMouseDown = (e: React.MouseEvent<HTMLTableCellElement>) => {
+  handleMouseDown = (e: MouseEvent<HTMLTableCellElement>) => {
     const {
       row,
       column,
@@ -62,6 +62,7 @@ export class Cell<Data extends Types.CellBase, Value> extends PureComponent<
       activate,
       mode
     } = this.props;
+
     if (mode === "view") {
       setCellDimensions({ row, column }, getOffsetRect(e.currentTarget));
 
@@ -103,7 +104,7 @@ export class Cell<Data extends Types.CellBase, Value> extends PureComponent<
     const { row, column, getValue, formulaParser } = this.props;
     let { DataViewer, data } = this.props;
     if (data && data.DataViewer) {
-      DataViewer = data.DataViewer;
+      let { DataViewer } = data;
     }
 
     return (
@@ -138,31 +139,31 @@ function mapStateToProps<Data>(
     dragging,
     lastChanged,
     bindings
-  }: Types.IStoreState<Data>,
+  }: IStoreState<Data>,
   { column, row }: Props<Data, any>
 ): State<Data> {
   const point = { row, column };
   const cellIsActive = isActive(active, point);
 
-  const cellBindings = PointMap.get(point, bindings);
+  const cellBindings = get(point, bindings);
 
   return {
     active: cellIsActive,
-    selected: PointSet.has(selected, point),
-    copied: PointMap.has(point, copied),
+    selected: hasPointSet(selected, point),
+    copied: hasPointMap(point, copied),
     mode: cellIsActive ? mode : "view",
-    data: Matrix.get(row, column, data),
+    data: getMatrix(row, column, data),
     dragging,
     /** @todo refactor */
     _bindingChanged:
-      cellBindings && lastChanged && PointSet.has(cellBindings, lastChanged)
+      cellBindings && lastChanged && hasPointSet(cellBindings, lastChanged)
         ? {}
         : undefined
   };
 }
 
 export const enhance = connect(mapStateToProps, () => ({
-  select: Actions.select,
-  activate: Actions.activate,
-  setCellDimensions: Actions.setCellDimensions
+  select,
+  activate,
+  setCellDimensions
 }));

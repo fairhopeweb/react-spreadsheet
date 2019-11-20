@@ -1,15 +1,15 @@
 import React from "react";
 import { connect } from "unistore/react";
 
-import * as PointSet from "./point-set";
-import * as PointMap from "./point-map";
+import { from } from "./point-set";
+import { map } from "./point-map";
 import FloatingRect, { mapStateToProps } from "./FloatingRect";
 import { IStoreState } from "./types";
 
-const Copied = (props: any) => <FloatingRect {...props} className='copied' />;
+const Copied = (props: any) => <FloatingRect {...props} className="copied" />;
 
 export default connect((state: IStoreState<any>) =>
-  mapStateToProps(
-    state.hasPasted ? PointSet.from([]) : PointMap.map(() => true, state.copied)
-  )(state)
+  mapStateToProps(state.hasPasted ? from([]) : map(() => true, state.copied))(
+    state
+  )
 )(Copied);

@@ -4,9 +4,18 @@
  */
 
 import { IPoint } from "./types";
-import * as PointMap from "./point-map";
+import {
+  from as pointMapFrom,
+  has as pointMapHas,
+  isEmpty as pointMapIsEmpty,
+  PointMap,
+  reduce as pointMapReduce,
+  set as pointMapSet,
+  size as pointMapSize,
+  unset
+} from "./point-map";
 
-export type PointSet = PointMap.PointMap<boolean>;
+export type PointSet = PointMap<boolean>;
 
 export interface IDescriptor<T> extends IPoint {
   data: T;
@@ -14,18 +23,18 @@ export interface IDescriptor<T> extends IPoint {
 
 /** Appends a new IPoint to the Set object */
 export const add = (set: PointSet, point: IPoint): PointSet =>
-  PointMap.set(point, true, set);
+  pointMapSet(point, true, set);
 
 /** Removes the IPoint from the Set object */
 export const remove = (set: PointSet, IPoint: IPoint): PointSet =>
-  PointMap.unset(IPoint, set);
+  unset(IPoint, set);
 
 /** Returns a boolean asserting whether an IPoint is present with the given value in the Set object or not */
 export const has = (set: PointSet, IPoint: IPoint): boolean =>
-  PointMap.has(IPoint, set);
+  pointMapHas(IPoint, set);
 
 /** Returns the number of points in a PointSet object */
-export const size = (set: PointSet) => PointMap.size(set);
+export const size = (set: PointSet) => pointMapSize(set);
 
 /** Applies a function against an accumulator and each IPoint in the set (from left to right) to reduce it to a single value */
 export function reduce<T>(
@@ -33,7 +42,7 @@ export function reduce<T>(
   set: PointSet,
   initialValue: T
 ): T {
-  return PointMap.reduce(
+  return pointMapReduce(
     (acc, _, IPoint) => func(acc, IPoint),
     set,
     initialValue
@@ -79,11 +88,11 @@ export function max(set: PointSet): IPoint {
 
 /** Creates a new PointSet instance from an array-like or iterable object */
 export function from(points: IPoint[]): PointSet {
-  return points.reduce(add, PointMap.from([]));
+  return points.reduce(add, pointMapFrom([]));
 }
 
 /** Returns whether set has any points in */
-export const isEmpty = (set: PointSet) => PointMap.isEmpty(set);
+export const isEmpty = (set: PointSet) => pointMapIsEmpty(set);
 
 /** Returns an array of the set points */
 export function toArray(set: PointSet): IPoint[] {
@@ -104,15 +113,15 @@ const NO_EDGE: OnEdge = {
   bottom: false
 };
 
-export function onEdge(set: PointSet, IPoint: IPoint): OnEdge {
-  if (!has(set, IPoint)) {
+export function onEdge(set: PointSet, point: IPoint): OnEdge {
+  if (!has(set, point)) {
     return NO_EDGE;
   }
 
   let hasNot = (rowDelta: number, columnDelta: number) =>
     !has(set, {
-      row: IPoint.row + rowDelta,
-      column: IPoint.column + columnDelta
+      row: point.row + rowDelta,
+      column: point.column + columnDelta
     });
 
   return {

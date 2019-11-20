@@ -1,33 +1,38 @@
 import React, { Component } from "react";
 import classnames from "classnames";
 import { connect } from "unistore/react";
-import * as Matrix from "./matrix";
-import * as Actions from "./actions";
-import * as Types from "./types";
-import { getCellDimensions } from "./util";
 
-interface ICell<Cell, Value> {
-  DataEditor: Types.DataEditor<Cell, Value>;
-  readOnly: boolean;
-}
+import { get } from "./matrix";
+import { commit as commitAction, edit, setCellData } from "./actions";
+import {
+  commit as commitType,
+  DataEditor,
+  getBindingsForCell,
+  getValue,
+  IDimensions,
+  IPoint,
+  IStoreState,
+  Mode
+} from "./types";
+import { getCellDimensions } from "./util";
 
 type State<Cell> = {
   cellBeforeUpdate: Cell;
 };
 
 type Props<Cell, Value> = {
-  DataEditor: Types.DataEditor<Cell, Value>;
-  getValue: Types.getValue<Cell, Value>;
+  DataEditor: DataEditor<Cell, Value>;
+  getValue: getValue<Cell, Value>;
   onChange: (data: Cell) => void;
-  setData: (active: Types.IPoint, data: Cell, bindings: Types.IPoint[]) => void;
+  setData: (active: IPoint, data: Cell, bindings: IPoint[]) => void;
   cell: Cell;
   hidden: boolean;
-  mode: Types.Mode;
+  mode: Mode;
   edit: () => void;
-  commit: Types.commit<Cell>;
-  getBindingsForCell: Types.getBindingsForCell<Cell>;
-} & Types.IPoint &
-  Types.IDimensions;
+  commit: commitType<Cell>;
+  getBindingsForCell: getBindingsForCell<Cell>;
+} & IPoint &
+  IDimensions;
 
 class ActiveCell<Cell, Value> extends Component<
   Props<Cell, Value>,
@@ -38,6 +43,7 @@ class ActiveCell<Cell, Value> extends Component<
   handleChange = (row: number, column: number, cell: Cell) => {
     const { setData, getBindingsForCell } = this.props;
     const bindings = getBindingsForCell(cell);
+
 
     setData({ row, column }, cell, bindings);
   };
@@ -99,10 +105,7 @@ class ActiveCell<Cell, Value> extends Component<
   }
 }
 
-const mapStateToProps = (
-  state: Types.IStoreState<any>,
-  { DataEditor, getValue, getBindingsForCell }: Props<any, any>
-) => {
+const mapStateToProps = (state: IStoreState<any>) => {
   const dimensions = state.active && getCellDimensions(state.active, state);
   if (!state.active || !dimensions) {
     return { hidden: true };
@@ -110,20 +113,17 @@ const mapStateToProps = (
   return {
     hidden: false,
     ...state.active,
-    cell: Matrix.get(state.active.row, state.active.column, state.data),
+    cell: get(state.active.row, state.active.column, state.data),
     width: dimensions.width,
     height: dimensions.height,
     top: dimensions.top,
     left: dimensions.left,
-    mode: state.mode,
-    DataEditor,
-    getValue,
-    getBindingsForCell
+    mode: state.mode
   };
 };
 
 export default connect(mapStateToProps, {
-  setData: Actions.setData,
-  edit: Actions.edit,
-  commit: Actions.commit
+  setCellData: setCellData,
+  edit: edit,
+  commit: commitAction
 })(ActiveCell);

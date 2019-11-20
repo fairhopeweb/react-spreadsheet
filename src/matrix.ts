@@ -1,12 +1,12 @@
 /**
  * Immutable interface for Matrices
  *
- * @todo use Types.IPoint for all point references
+ * @todo use IPoint for all point references
  *
  */
 
 import { range as _range } from "./util";
-import * as Types from "./types";
+import { IPoint } from "./types";
 
 export type Matrix<T> = Array<Array<T | typeof undefined>>;
 
@@ -25,8 +25,8 @@ export function get<T>(
 
 /** Creates a slice of matrix from startPoint up to, but not including, endPoint. */
 export function slice<T>(
-  startPoint: Types.IPoint,
-  endPoint: Types.IPoint,
+  startPoint: IPoint,
+  endPoint: IPoint,
   matrix: Matrix<T>
 ): Matrix<T> {
   let sliced: any[] = [];
@@ -107,7 +107,7 @@ export function unset<T>(
 }
 
 export function reduce<T, A>(
-  func: (_: A, __: T | typeof undefined, arg2: Types.IPoint) => A,
+  func: (acc: A, value: T | typeof undefined, point: IPoint) => A,
   matrix: Matrix<T>,
   initialValue: A
 ): A {
@@ -128,7 +128,7 @@ export function reduce<T, A>(
 
 /** Creates an array of values by running each element in collection thru iteratee. */
 export function map<T, T2>(
-  func: (_: T | typeof undefined, arg1: Types.IPoint) => T2,
+  func: (value: T | typeof undefined, point: IPoint) => T2,
   matrix: Matrix<T>
 ): Matrix<T2> {
   return reduce(
@@ -196,10 +196,7 @@ export function getSize(matrix: Matrix<any>): Size {
 }
 
 /** Creates an array of points (positive and/or negative) progressing from startPoint up to, but not including, endPoint. */
-export function range(
-  endPoint: Types.IPoint,
-  startPoint: Types.IPoint
-): Types.IPoint[] {
+export function range(endPoint: IPoint, startPoint: IPoint): IPoint[] {
   const points = [];
   const columnsRange =
     startPoint.column !== endPoint.column
@@ -238,7 +235,7 @@ export const inclusiveRange: typeof range = (endPoint, startPoint) =>
 
 export function toArray<T1, T2>(
   matrix: Matrix<any>,
-  transform?: (_?: T1) => T2
+  transform?: (value?: T1) => T2
 ): T1[] | T2[] {
   let array = [];
   for (let row = 0; row < matrix.length; row++) {

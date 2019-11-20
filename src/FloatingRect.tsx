@@ -1,14 +1,15 @@
-import React from "react";
-import * as PointSet from "./point-set";
-import * as Types from "./types";
 import classnames from "classnames";
+import React from "react";
+
+import { onEdge, PointSet, reduce, size } from "./point-set";
+import { IDimensions, IStoreState } from "./types";
 import { getCellDimensions } from "./util";
 import "./FloatingRect.css";
 
 type Props = {
   className?: string;
   hidden?: boolean;
-} & Types.IDimensions;
+} & IDimensions;
 
 const FloatingRect = ({
   width,
@@ -25,12 +26,12 @@ const FloatingRect = ({
 );
 
 const getRangeDimensions = (
-  points: PointSet.PointSet,
-  state: Types.IStoreState<any>
-): Types.IDimensions => {
-  const { width, height, left, top } = PointSet.reduce(
+  points: PointSet,
+  state: IStoreState<any>
+): IDimensions => {
+  const { width, height, left, top } = reduce(
     (acc, point) => {
-      const isOnEdge = PointSet.onEdge(points, point);
+      const isOnEdge = onEdge(points, point);
       const dimensions = getCellDimensions(point, state);
       if (dimensions) {
         acc.width = isOnEdge.top ? acc.width + dimensions.width : acc.width;
@@ -48,12 +49,12 @@ const getRangeDimensions = (
   return { left, top, width, height };
 };
 
-export const mapStateToProps = (cells: PointSet.PointSet) => (
-  state: Types.IStoreState<any>
+export const mapStateToProps = (cells: PointSet) => (
+  state: IStoreState<any>
 ) => {
   return {
     ...getRangeDimensions(cells, state),
-    hidden: PointSet.size(cells) === 0
+    hidden: size(cells) === 0
   };
 };
 

@@ -1,11 +1,11 @@
-import React, { Component, ReactChildren } from "react";
+import React, { Component, FC, ReactNode } from "react";
 import * as Types from "./types";
 
 type Cell = {
   component?: Component<{
     row: number;
     column: number;
-    value: ReactChildren;
+    value: ReactNode;
   }>;
 };
 
@@ -15,13 +15,13 @@ type Props = Types.ICellComponentProps<Cell, Node> & {
 
 const toView = (value: boolean | string | Node) => {
   if (typeof value === "boolean") {
-    return <div className='boolean'>{value ? "TRUE" : "FALSE"}</div>;
+    return <div className="boolean">{value ? "TRUE" : "FALSE"}</div>;
   }
 
   return value;
 };
 
-const DataViewer: React.FC<Props> = ({
+const DataViewer: FC<Props> = ({
   getValue,
   cell,
   column,

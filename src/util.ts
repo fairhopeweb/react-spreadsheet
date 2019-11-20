@@ -1,4 +1,4 @@
-import * as Types from "./types";
+import { ICellDescriptor, IDimensions, IPoint, IStoreState } from "./types";
 import { Matrix } from "./matrix";
 
 import * as clipboard from "clipboard-polyfill";
@@ -33,7 +33,7 @@ export function range(
 
 export function updateData<Cell>(
   data: Matrix<Cell>,
-  cellDescriptor: Types.ICellDescriptor<Cell>
+  cellDescriptor: ICellDescriptor<Cell>
 ): Matrix<Cell> {
   const row = data[cellDescriptor.row];
   const nextData = [...data];
@@ -45,7 +45,7 @@ export function updateData<Cell>(
 
 export function setCell<Cell>(
   state: { data: Matrix<Cell> },
-  active: Types.IPoint,
+  active: IPoint,
   cell: Cell
 ): Matrix<Cell> {
   return updateData(state.data, {
@@ -55,13 +55,13 @@ export function setCell<Cell>(
 }
 
 export function isActive(
-  active: Types.IStoreState<any>["active"],
-  { row, column }: Types.IPoint
+  active: IStoreState<any>["active"],
+  { row, column }: IPoint
 ): boolean {
   return Boolean(active && column === active.column && row === active.row);
 }
 
-export const getOffsetRect = (element: HTMLElement): Types.IDimensions => ({
+export const getOffsetRect = (element: HTMLElement): IDimensions => ({
   width: element.offsetWidth,
   height: element.offsetHeight,
   left: element.offsetLeft,
@@ -99,9 +99,9 @@ export function createEmptyMatrix<T>(rows: number, columns: number): Matrix<T> {
 }
 
 export const getCellDimensions = (
-  point: Types.IPoint,
-  state: Types.IStoreState<any>
-): Types.IDimensions => {
+  point: IPoint,
+  state: IStoreState<any>
+): IDimensions => {
   const rowDimensions = state.rowDimensions[point.row];
   const columnDimensions = state.columnDimensions[point.column];
   return (

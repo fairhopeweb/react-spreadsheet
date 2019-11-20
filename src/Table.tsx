@@ -1,13 +1,13 @@
-import React from "react";
+import React, { FC, ReactNode } from "react";
 import { range } from "./util";
 
 export type Props = {
   columns: number;
   hideColumnIndicators?: boolean;
-  children: (React.ReactElement | React.ReactElement[])[];
+  children: (ReactNode | ReactNode[])[];
 };
 
-const Table: React.FC<Props> = ({
+const Table: FC<Props> = ({
   children,
   columns,
   hideColumnIndicators
@@ -17,7 +17,7 @@ const Table: React.FC<Props> = ({
     <col key={i} />
   ));
   return (
-    <table className='SpreadsheetTable'>
+    <table className="SpreadsheetTable">
       <colgroup>{columnNodes}</colgroup>
       <tbody>{children}</tbody>
     </table>

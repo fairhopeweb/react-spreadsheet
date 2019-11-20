@@ -1,35 +1,69 @@
-import {KeyboardEvent} from "react";
-import * as PointSet from "./point-set";
-import * as PointMap from "./point-map";
-import * as Matrix from "./matrix";
-import * as Types from "./types";
-import {isActive, setCell, updateData} from "./util";
+import { KeyboardEvent } from "react";
 
-type Action = <Cell>(
-  state: Types.IStoreState<Cell>,
+import {
+  add as pointSetAdd,
+  extendEdge as pointSetExtendEdge,
+  filter as pointSetFilter,
+  from as pointSetFrom,
+  has as pointSetHas,
+  isEmpty as pointSetIsEmpty,
+  min as pointSetMin,
+  PointSet,
+  reduce as pointSetReduce,
+  shrinkEdge as pointSetShrinkEdge,
+  toArray as pointSetToArray
+} from "./point-set";
+import {
+  filter as pointMapFilter,
+  from as pointMapFrom,
+  map as pointMapMap,
+  PointMap,
+  reduce as pointMapReduce,
+  set as pointMapSet
+} from "./point-map";
+import {
+  get as matrixGet,
+  has as matrixHas,
+  inclusiveRange,
+  Matrix,
+  set as matrixSet,
+  unset as matrixUnset
+} from "./matrix";
+import {
+  CellBase,
+  CellChange,
+  IDimensions,
+  IPoint,
+  IStoreState
+} from "./types";
+import { isActive, setCell, updateData } from "./util";
+
+export type Action = <Cell>(
+  state: IStoreState<Cell>,
+  data: any,
   active?: any,
-  selected?: PointSet.PointSet,
-  bindings?: PointSet.PointSet,
-  cellPointer?: Types.IPoint
-) => Partial<Types.IStoreState<Cell>> | null;
+  selected?: PointSet,
+  bindings?: PointSet,
+  cellPointer?: IPoint
+) => Partial<IStoreState<Cell>>;
 
-export const setData: Action = (state, data: Matrix.Matrix<any>) => {
+export const setData: Action = (state, data: Matrix<any>) => {
   const nextActive =
-    state.active && Matrix.has(state.active.row, state.active.column, data)
+    state.active && matrixHas(state.active.row, state.active.column, data)
       ? state.active
       : null;
-  const nextSelected = PointSet.filter(
-    point => Matrix.has(point.row, point.column, data),
+  const nextSelected = pointSetFilter(
+    point => matrixHas(point.row, point.column, data),
     state.selected
   );
-  const nextBindings = PointMap.map(
+  const nextBindings = pointMapMap(
     bindings =>
-      PointSet.filter(
-        point => Matrix.has(point.row, point.column, data),
+      pointSetFilter(
+        point => matrixHas(point.row, point.column, data),
         bindings
       ),
-    PointMap.filter(
-      (_, point) => Matrix.has(point.row, point.column, data),
+    pointMapFilter(
+      (_, point) => matrixHas(point.row, point.column, data),
       state.bindings
     )
   );
@@ -41,11 +75,11 @@ export const setData: Action = (state, data: Matrix.Matrix<any>) => {
   };
 };
 
-export const select: Action = (state: any, cellPointer: Types.IPoint) => {
+export const select: Action = (state: any, cellPointer: IPoint) => {
   if (state.active && !isActive(state.active, cellPointer)) {
     return {
-      selected: PointSet.from(
-        Matrix.inclusiveRange(
+      selected: pointSetFrom(
+        inclusiveRange(
           { row: cellPointer.row, column: cellPointer.column },
           { row: state.active.row, column: state.active.column }
         )
@@ -56,31 +90,31 @@ export const select: Action = (state: any, cellPointer: Types.IPoint) => {
   return null;
 };
 
-export const activate = (state: any, cellPointer: Types.IPoint) => ({
-  selected: PointSet.from([cellPointer]),
+export const activate = (state: any, cellPointer: IPoint) => ({
+  selected: pointSetFrom([cellPointer]),
   active: cellPointer,
   mode: isActive(state.active, cellPointer) ? "edit" : "view"
 });
 
 export function setCellData<Cell>(
-  state: Types.IStoreState<Cell>,
-  active: Types.IPoint,
+  state: IStoreState<Cell>,
+  active: IPoint,
   data: Cell,
-  bindings: Types.IPoint[]
-): Partial<Types.IStoreState<Cell>> {
+  bindings: IPoint[]
+): Partial<IStoreState<Cell>> {
   return {
     mode: "edit",
     data: setCell(state, active, data),
     lastChanged: active,
-    bindings: PointMap.set(active, PointSet.from(bindings), state.bindings)
+    bindings: pointMapSet(active, pointSetFrom(bindings), state.bindings)
   };
 }
 
 export function setCellDimensions(
-  state: Types.IStoreState<any>,
-  point: Types.IPoint,
-  dimensions: Types.IDimensions
-): Partial<Types.IStoreState<any>> | null {
+  state: IStoreState<any>,
+  point: IPoint,
+  dimensions: IDimensions
+): Partial<IStoreState<any>> | null {
   const prevRowDimensions = state.rowDimensions[point.row];
   const prevColumnDimensions = state.columnDimensions[point.column];
   if (
@@ -105,66 +139,63 @@ export function setCellDimensions(
   };
 }
 
-export function copy<T>(state: Types.IStoreState<T>) {
+export function copy<T>(state: IStoreState<T>) {
   return {
-    copied: PointSet.reduce(
+    copied: pointSetReduce(
       (acc, point) =>
-        PointMap.set<T>(
+        pointMapSet<T>(
           point,
-          Matrix.get<T>(point.row, point.column, state.data) as T,
+          matrixGet<T>(point.row, point.column, state.data),
           acc
         ),
       state.selected,
-      PointMap.from<T>([])
+      pointMapFrom<T>([])
     ),
     cut: false,
     hasPasted: false
   };
 }
 
-export const cut = (state: Types.IStoreState<any>) => ({
+export const cut = (state: IStoreState<any>) => ({
   ...copy(state),
   cut: true
 });
 
-export function paste<Cell>(state: Types.IStoreState<Cell>) {
-  if (PointSet.isEmpty(state.copied)) {
+export function paste<Cell>(state: IStoreState<Cell>) {
+  if (pointSetIsEmpty(state.copied)) {
     return null;
   }
-  const minPoint = PointSet.min(state.copied);
+  const minPoint = pointSetMin(state.copied);
 
   type Accumulator = {
-    data: Types.IStoreState<Cell>["data"];
-    selected: Types.IStoreState<Cell>["selected"];
-    commit: Types.IStoreState<Cell>["lastCommit"];
+    data: IStoreState<Cell>["data"];
+    selected: IStoreState<Cell>["selected"];
+    commit: IStoreState<Cell>["lastCommit"];
   };
 
-  const { data, selected, commit } = PointMap.reduce(
+  const { data, selected, commit } = pointMapReduce(
     (
       acc: Accumulator,
-      value:
-        | Types.CellChange<Cell>["prevCell"]
-        | Types.CellChange<Cell>["nextCell"],
+      value: CellChange<Cell>["prevCell"] | CellChange<Cell>["nextCell"],
       { row, column }
     ): any => {
       if (!state.active) {
         return acc;
       }
 
-      let commit: null | Types.IStoreState<Cell>["lastCommit"] =
-        acc.commit || [];
+      let commit: IStoreState<Cell>["lastCommit"] = acc.commit || [];
       const nextRow = row - minPoint.row + state.active.row;
       const nextColumn = column - minPoint.column + state.active.column;
 
       const nextData = state.cut
-        ? Matrix.unset(row, column, acc.data)
+        ? matrixUnset(row, column, acc.data)
         : acc.data;
 
       if (state.cut && commit) {
         commit = [...commit, { prevCell: value, nextCell: null }];
       }
 
-      if (!Matrix.has(nextRow, nextColumn, state.data)) {
+      if (!matrixHas(nextRow, nextColumn, state.data)) {
         return { data: nextData, selected: acc.selected, commit };
       }
 
@@ -172,27 +203,25 @@ export function paste<Cell>(state: Types.IStoreState<Cell>) {
         commit = [
           ...commit,
           {
-            prevCell: Matrix.get(
-              nextRow,
-              nextColumn,
-              nextData
-            ) as Types.CellChange<Cell>["prevCell"],
+            prevCell: matrixGet(nextRow, nextColumn, nextData) as CellChange<
+              Cell
+            >["prevCell"],
             nextCell: value
           }
         ];
       }
 
       return {
-        data: Matrix.set(nextRow, nextColumn, value, nextData),
-        selected: PointSet.add(acc.selected, {
+        data: matrixSet(nextRow, nextColumn, value, nextData),
+        selected: pointSetAdd(acc.selected, {
           row: nextRow,
           column: nextColumn
         }),
         commit
       };
     },
-    state.copied as PointMap.PointMap<any>,
-    { data: state.data, selected: PointSet.from([]), commit: [] }
+    state.copied as PointMap<any>,
+    { data: state.data, selected: pointSetFrom([]), commit: [] }
   );
   return {
     data,
@@ -204,7 +233,7 @@ export function paste<Cell>(state: Types.IStoreState<Cell>) {
   };
 }
 
-export const edit = <Cell>(state: Types.IStoreState<Cell>) => {
+export const edit = <Cell>(state: IStoreState<Cell>) => {
   if (isActiveReadOnly(state)) {
     return null;
   }
@@ -216,15 +245,15 @@ export const view = () => ({
   mode: "view"
 });
 
-export const clear = (state: Types.IStoreState<any>) => {
+export const clear = (state: IStoreState<any>) => {
   if (!state.active) {
     return null;
   }
 
   const { row, column } = state.active;
-  const cell = Matrix.get(row, column, state.data);
+  const cell = matrixGet(row, column, state.data);
   return {
-    data: PointSet.reduce(
+    data: pointSetReduce(
       (acc, point) =>
         updateData(acc, {
           ...point,
@@ -235,8 +264,8 @@ export const clear = (state: Types.IStoreState<any>) => {
     ),
     ...commit(
       state,
-      PointSet.toArray(state.selected).map(point => {
-        const cell = Matrix.get(point.row, point.column, state.data);
+      pointSetToArray(state.selected).map(point => {
+        const cell = matrixGet(point.row, point.column, state.data);
         return {
           prevCell: cell,
           nextCell: { ...cell, value: "" }
@@ -247,14 +276,14 @@ export const clear = (state: Types.IStoreState<any>) => {
 };
 
 export type KeyDownHandler<Cell> = (
-  state: Types.IStoreState<Cell>,
+  state: IStoreState<Cell>,
   event: KeyboardEvent
-) => Partial<Types.IStoreState<Cell>> | null;
+) => Partial<IStoreState<Cell>> | null;
 
-export const go = (
+export const go = <CellBase>(
   rowDelta: number,
   columnDelta: number
-): KeyDownHandler<any> => (state, _) => {
+): KeyDownHandler<any> => (state, event) => {
   if (!state.active) {
     return null;
   }
@@ -262,35 +291,35 @@ export const go = (
     row: state.active.row + rowDelta,
     column: state.active.column + columnDelta
   };
-  if (!Matrix.has(nextActive.row, nextActive.column, state.data)) {
+  if (!matrixHas(nextActive.row, nextActive.column, state.data)) {
     return { mode: "view" };
   }
   return {
     active: nextActive,
-    selected: PointSet.from([nextActive]),
+    selected: pointSetFrom([nextActive]),
     mode: "view"
   };
 };
 
-export const modifyEdge = (field: keyof Types.IPoint, delta: number) => (
-  state: Types.IStoreState<any>
+export const modifyEdge = (field: keyof IPoint, delta: number) => (
+  state: IStoreState<any>
 ) => {
   if (!state.active) {
     return null;
   }
 
-  const edgeOffsets = PointSet.has(state.selected, {
+  const edgeOffsets = pointSetHas(state.selected, {
     ...state.active,
     [field]: state.active[field] + delta * -1
   });
 
   const nextSelected = edgeOffsets
-    ? PointSet.shrinkEdge(state.selected, field, delta * -1)
-    : PointSet.extendEdge(state.selected, field, delta);
+    ? pointSetShrinkEdge(state.selected, field, delta * -1)
+    : pointSetExtendEdge(state.selected, field, delta);
 
   return {
-    selected: PointSet.filter(
-      point => Matrix.has(point.row, point.column, state.data),
+    selected: pointSetFilter(
+      point => matrixHas(point.row, point.column, state.data),
       nextSelected
     )
   };
@@ -302,7 +331,7 @@ export const blur = () => ({
 
 // Key Bindings
 
-type KeyDownHandlers<Cell> = {
+type KeyDownHandlers<Cell extends CellBase> = {
   [eventType: string]: KeyDownHandler<Cell>;
 };
 
@@ -313,7 +342,8 @@ const keyDownHandlers: KeyDownHandlers<any> = {
   ArrowLeft: go(0, -1),
   ArrowRight: go(0, +1),
   Tab: go(0, +1),
-  Enter: edit as KeyDownHandler<any>,
+  // TODO: Fix type here: edit() returns { mode: "edit" } | null which isn't a KeyDownHandlers
+  Enter: edit as any,
   Backspace: clear,
   Escape: blur
 };
@@ -334,19 +364,18 @@ const shiftKeyDownHandlers: KeyDownHandlers<any> = {
 const shiftMetaKeyDownHandlers: KeyDownHandlers<any> = {};
 const metaKeyDownHandlers: KeyDownHandlers<any> = {};
 
-function getActive<Cell>(state: Types.IStoreState<Cell>): any {
+function getActive<Cell extends CellBase>(state: IStoreState<Cell>): any {
   return (
-    state.active &&
-    Matrix.get(state.active.row, state.active.column, state.data)
+    state.active && matrixGet(state.active.row, state.active.column, state.data)
   );
 }
 
-const isActiveReadOnly = <Cell>(state: Types.IStoreState<Cell>): boolean => {
+const isActiveReadOnly = <Cell>(state: IStoreState<Cell>): boolean => {
   const activeCell = getActive(state);
   return Boolean(activeCell && activeCell.readOnly);
 };
 
-export function keyPress(state: Types.IStoreState<any>, _: KeyboardEvent) {
+export function keyPress(state: IStoreState<any>, _: KeyboardEvent) {
   if (state.mode === "view" && state.active) {
     return { mode: "edit" };
   }
@@ -354,8 +383,8 @@ export function keyPress(state: Types.IStoreState<any>, _: KeyboardEvent) {
 }
 
 export const getKeyDownHandler = (
-  state: Types.IStoreState<any>,
-  event: React.KeyboardEvent<HTMLInputElement>
+  state: IStoreState<any>,
+  event: KeyboardEvent<HTMLInputElement>
 ) => {
   const { key } = event;
   let handlers;
@@ -375,7 +404,7 @@ export const getKeyDownHandler = (
 };
 
 export function keyDown(
-  state: Types.IStoreState<any>,
+  state: IStoreState<any>,
   event: KeyboardEvent<HTMLInputElement>
 ) {
   const handler = getKeyDownHandler(state, event);
@@ -385,16 +414,16 @@ export function keyDown(
   return null;
 }
 
-export function dragStart() {
+export function dragStart<T>(state: IStoreState<T>) {
   return { dragging: true };
 }
 
-export function dragEnd() {
+export function dragEnd<T>(state: IStoreState<T>) {
   return { dragging: false };
 }
 
 export function commit<T>(
-  _: Types.IStoreState<T>,
+  _: IStoreState<T>,
   changes: Array<{ prevCell: T | null; nextCell: T | null }>
 ) {
   return { lastCommit: changes };

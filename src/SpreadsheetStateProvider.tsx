@@ -4,12 +4,11 @@ import createStore, { Store } from "unistore";
 import devtools from "unistore/devtools";
 import { Provider } from "unistore/react";
 
-import * as Types from "./types";
-import { IPoint, IStoreState } from "./types";
-import * as Actions from "./actions";
-import * as PointSet from "./point-set";
-import * as PointMap from "./point-map";
-import * as Matrix from "./matrix";
+import { IPoint, IStoreState, Mode } from "./types";
+import { Action, setData } from "./actions";
+import { from as pointSetFrom, toArray } from "./point-set";
+import { from as pointMapFrom } from "./point-map";
+import { Matrix } from "./matrix";
 import Spreadsheet, { Props as SpreadsheetProps } from "./Spreadsheet";
 
 export { createEmptyMatrix } from "./util";
@@ -18,8 +17,8 @@ type Unsubscribe = () => void;
 
 export interface IProps<CellType, Value>
   extends SpreadsheetProps<CellType, Value> {
-  onChange: (data: Matrix.Matrix<CellType>) => void;
-  onModeChange: (mode: Types.Mode) => void;
+  onChange: (data: Matrix<CellType>) => void;
+  onModeChange: (mode: Mode) => void;
   onSelect: (selected: IPoint[]) => void;
   onActivate: (active: IPoint) => void;
   onCellCommit: (
@@ -30,14 +29,14 @@ export interface IProps<CellType, Value>
 }
 
 const initialState: Partial<IStoreState<any>> = {
-  selected: PointSet.from([]),
-  copied: PointMap.from([]),
+  selected: pointSetFrom([]),
+  copied: pointMapFrom([]),
   active: null,
   mode: "view",
   rowDimensions: {},
   columnDimensions: {},
   lastChanged: null,
-  bindings: PointMap.from([])
+  bindings: pointMapFrom([])
 };
 
 export default class SpreadsheetStateProvider<
@@ -84,42 +83,35 @@ export default class SpreadsheetStateProvider<
       onActivate,
       onCellCommit
     } = this.props;
-    this.unsubscribe = this.store.subscribe(
-      (state: Types.IStoreState<CellType>) => {
-        const { prevState } = this;
+    this.unsubscribe = this.store.subscribe((state: IStoreState<CellType>) => {
+      const { prevState } = this;
 
-        if (state.lastCommit && state.lastCommit !== prevState.lastCommit) {
-          for (const change of state.lastCommit) {
-            if (state.active) {
-              onCellCommit(change.prevCell, change.nextCell, state.active);
-            }
-          }
+      if (state.lastCommit && state.lastCommit !== prevState.lastCommit) {
+        for (const change of state.lastCommit) {
+          onCellCommit(change.prevCell, change.nextCell, state.active);
         }
-
-        if (state.data !== prevState.data && state.data !== this.props.data) {
-          onChange(state.data);
-        }
-        if (state.mode !== prevState.mode) {
-          onModeChange(state.mode);
-        }
-        if (state.selected !== prevState.selected) {
-          onSelect(PointSet.toArray(state.selected));
-        }
-        if (state.active !== prevState.active && state.active) {
-          onActivate(state.active);
-        }
-        this.prevState = state;
       }
-    );
+
+      if (state.data !== prevState.data && state.data !== this.props.data) {
+        onChange(state.data);
+      }
+      if (state.mode !== prevState.mode) {
+        onModeChange(state.mode);
+      }
+      if (state.selected !== prevState.selected) {
+        onSelect(toArray(state.selected));
+      }
+      if (state.active !== prevState.active && state.active) {
+        onActivate(state.active);
+      }
+      this.prevState = state;
+    });
   }
 
   componentDidUpdate() {
     if (this.props.data !== this.prevState.data) {
       this.store.setState(
-        Actions.setData(this.store.getState(), this.props.data) as Pick<
-          string,
-          any
-        >
+        setData(this.store.getState(), this.props.data) as Partial<Action>
       );
     }
   }

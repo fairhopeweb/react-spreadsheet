@@ -4,7 +4,8 @@
     "tslint-config-prettier",
     "tslint-eslint-rules",
     "tslint-consistent-codestyle",
-    "tslint-react"
+    "tslint-react",
+    "tslint-import-group-ordering"
   ],
   "rules": {
     "jsx-boolean-value": ["never"],
