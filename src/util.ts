@@ -1,5 +1,11 @@
-import { ICellDescriptor, IDimensions, IPoint, IStoreState } from "./types";
 import { Matrix } from "./matrix";
+import {
+  CellBase,
+  ICellDescriptor,
+  IDimensions,
+  IPoint,
+  IStoreState
+} from "./types";
 
 import * as clipboard from "clipboard-polyfill";
 
@@ -8,7 +14,10 @@ export const moveCursorToEnd = (el: HTMLInputElement) => {
 };
 
 /**
- * Creates an array of numbers (positive and/or negative) progressing from start up to, but not including, end. A step of -1 is used if a negative start is specified without an end or step. If end is not specified, it's set to start with start then set to 0.
+ * Creates an array of numbers (positive and/or negative) progressing from start up to, but not including, end.
+ * A step of -1 is used if a negative start is specified without an end or step.
+ * If end is not specified, it's set to start with start then set to 0.
+ *
  * @param end
  * @param start
  * @param step
@@ -18,7 +27,7 @@ export function range(
   start: number = 0,
   step: number = 1
 ): number[] {
-  let array = [];
+  const array = [];
   if (Math.sign(end - start) === -1) {
     for (let element = start; element > end; element -= step) {
       array.push(element);
@@ -31,7 +40,7 @@ export function range(
   return array;
 }
 
-export function updateData<Cell>(
+export function updateData<Cell extends CellBase>(
   data: Matrix<Cell>,
   cellDescriptor: ICellDescriptor<Cell>
 ): Matrix<Cell> {
@@ -43,7 +52,7 @@ export function updateData<Cell>(
   return nextData;
 }
 
-export function setCell<Cell>(
+export function setCell<Cell extends CellBase>(
   state: { data: Matrix<Cell> },
   active: IPoint,
   cell: Cell

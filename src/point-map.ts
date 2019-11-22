@@ -61,14 +61,16 @@ export function getColumn<T>(column: number, map: PointMap<T>): T[] {
 const EMPTY: PointMap<any> = {} as any;
 
 /** Creates a new PointMap instance from an array-like or iterable object. */
-export function from<T>(pairs: [IPoint, T][]): PointMap<T> {
+export function from<T>(pairs: Array<[IPoint, T]>): PointMap<T> {
   return pairs.reduce((acc, [point, value]) => set(point, value, acc), EMPTY);
 }
 
 /** Returns the number of elements in a PointMap object. */
 export function size(map: PointMap<any>): number {
   let acc = 0;
+  // tslint:disable-next-line:variable-name
   const _map_keys = Object.keys(map);
+  // tslint:disable-next-line:prefer-for-of
   for (let i = 0; i < _map_keys.length; i++) {
     const row = Number(_map_keys[i]);
     const columns = map[row];
@@ -77,22 +79,29 @@ export function size(map: PointMap<any>): number {
   return acc;
 }
 
-/** Applies a function against an accumulator and each value and point in the map (from left to right) to reduce it to a single value */
+/*
+ * Applies a function against an accumulator and each value
+ * and point in the map (from left to right) to reduce it to a single value
+ */
 export function reduce<A, T>(
   func: (_: A, value: T, point: IPoint) => A,
   map: PointMap<T>,
   initialValue: A
 ): A {
   let acc = initialValue;
+  // tslint:disable-next-line:variable-name
   const _map_keys = Object.keys(map);
+  // tslint:disable-next-line:prefer-for-of
   for (let i = 0; i < _map_keys.length; i++) {
     const row = Number(_map_keys[i]);
     const columns = map[row];
+    // tslint:disable-next-line:variable-name
     const _columns_keys = Object.keys(columns);
+    // tslint:disable-next-line:prefer-for-of
     for (let j = 0; j < _columns_keys.length; j++) {
       const column = Number(_columns_keys[j]);
       const value = columns[column];
-      acc = func(acc, value, { row: row, column: column });
+      acc = func(acc, value, { row, column });
     }
   }
   return acc;
@@ -110,7 +119,10 @@ export function map<T1, T2>(
   );
 }
 
-/** Creates a new map of all values predicate returns truthy for. The predicate is invoked with two arguments: (value, key) */
+/*
+ * Creates a new map of all values predicate returns truthy for.
+ * The predicate is invoked with two arguments: (value, key)
+ */
 export function filter<T>(
   predicate: (_: T, __: IPoint) => boolean,
   map: PointMap<T>

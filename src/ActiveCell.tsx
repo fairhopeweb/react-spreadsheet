@@ -1,10 +1,11 @@
-import React, { Component } from "react";
 import classnames from "classnames";
+import React, { Component } from "react";
 import { connect } from "unistore/react";
 
-import { get } from "./matrix";
 import { commit as commitAction, edit, setCellData } from "./actions";
+import { get } from "./matrix";
 import {
+  CellBase,
   commit as commitType,
   DataEditor,
   getBindingsForCell,
@@ -20,7 +21,7 @@ type State<Cell> = {
   cellBeforeUpdate: Cell;
 };
 
-type Props<Cell, Value> = {
+interface IProps<Cell, Value> extends IPoint, IDimensions {
   DataEditor: DataEditor<Cell, Value>;
   getValue: getValue<Cell, Value>;
   onChange: (data: Cell) => void;
@@ -31,25 +32,23 @@ type Props<Cell, Value> = {
   edit: () => void;
   commit: commitType<Cell>;
   getBindingsForCell: getBindingsForCell<Cell>;
-} & IPoint &
-  IDimensions;
+}
 
-class ActiveCell<Cell, Value> extends Component<
-  Props<Cell, Value>,
+class ActiveCell<Cell extends CellBase, Value> extends Component<
+  IProps<Cell, Value>,
   State<any>
 > {
-  state = { cellBeforeUpdate: null };
+  public state = { cellBeforeUpdate: null };
 
-  handleChange = (row: number, column: number, cell: Cell) => {
+  private handleChange = (row: number, column: number, cell: Cell) => {
     const { setData, getBindingsForCell } = this.props;
     const bindings = getBindingsForCell(cell);
-
 
     setData({ row, column }, cell, bindings);
   };
 
   // NOTE: Currently all logics here belongs to commit event
-  componentDidUpdate(prevProps: Props<Cell, Value>) {
+  public componentDidUpdate(prevProps: IProps<Cell, Value>) {
     const { cell, mode, commit } = this.props;
 
     if (cell || cell === undefined) {
@@ -68,7 +67,7 @@ class ActiveCell<Cell, Value> extends Component<
     }
   }
 
-  render() {
+  public render() {
     let { DataEditor } = this.props;
     const {
       getValue,
@@ -123,7 +122,7 @@ const mapStateToProps = (state: IStoreState<any>) => {
 };
 
 export default connect(mapStateToProps, {
-  setCellData: setCellData,
-  edit: edit,
+  setCellData,
+  edit,
   commit: commitAction
 })(ActiveCell);

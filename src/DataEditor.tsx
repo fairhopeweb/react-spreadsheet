@@ -1,5 +1,5 @@
 import React, { ChangeEvent, PureComponent } from "react";
-import * as Types from "./types";
+import { DataEditorProps } from "./types";
 import { moveCursorToEnd } from "./util";
 
 type Cell = {
@@ -8,32 +8,29 @@ type Cell = {
 
 type Value = string | number;
 
-class DataEditor extends PureComponent<
-  Types.DataEditorProps<Cell, Value>,
-  void
-> {
-  input?: HTMLInputElement;
+class DataEditor extends PureComponent<DataEditorProps<Cell, Value>, void> {
+  public input?: HTMLInputElement;
 
-  static defaultProps = {
+  private static defaultProps = {
     value: ""
   };
 
-  handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  private handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { onChange, cell } = this.props;
     onChange({ ...cell, value: e.target.value });
   };
 
-  handleInput = (input?: HTMLInputElement) => {
+  private handleInput = (input?: HTMLInputElement) => {
     this.input = input;
   };
 
-  componentDidMount() {
+  public componentDidMount() {
     if (this.input) {
       moveCursorToEnd(this.input);
     }
   }
 
-  render() {
+  public render() {
     const { getValue, column, row, cell } = this.props;
     const value = getValue({ column, row, data: cell }) || "";
     return (

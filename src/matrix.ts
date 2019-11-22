@@ -5,8 +5,8 @@
  *
  */
 
-import { range as _range } from "./util";
 import { IPoint } from "./types";
+import { range as _range } from "./util";
 
 export type Matrix<T> = Array<Array<T | typeof undefined>>;
 
@@ -29,7 +29,7 @@ export function slice<T>(
   endPoint: IPoint,
   matrix: Matrix<T>
 ): Matrix<T> {
-  let sliced: any[] = [];
+  const sliced: any[] = [];
   const columns = endPoint.column - startPoint.column;
   for (let row = startPoint.row; row <= endPoint.row; row++) {
     const slicedRow = row - startPoint.row;
@@ -195,7 +195,9 @@ export function getSize(matrix: Matrix<any>): Size {
   };
 }
 
-/** Creates an array of points (positive and/or negative) progressing from startPoint up to, but not including, endPoint. */
+/**
+ * Creates an array of points (positive and/or negative) progressing from startPoint up to, but not including, endPoint.
+ */
 export function range(endPoint: IPoint, startPoint: IPoint): IPoint[] {
   const points = [];
   const columnsRange =
@@ -212,8 +214,10 @@ export function range(endPoint: IPoint, startPoint: IPoint): IPoint[] {
       ? [startPoint.row]
       : [];
 
+  // tslint:disable-next-line:prefer-for-of
   for (let i = 0; i < rowsRange.length; i++) {
     const row = rowsRange[i];
+    // tslint:disable-next-line:prefer-for-of
     for (let j = 0; j < columnsRange.length; j++) {
       const column = columnsRange[j];
       points.push({ row, column });
@@ -237,7 +241,8 @@ export function toArray<T1, T2>(
   matrix: Matrix<any>,
   transform?: (value?: T1) => T2
 ): T1[] | T2[] {
-  let array = [];
+  const array = [];
+  // tslint:disable-next-line:prefer-for-of
   for (let row = 0; row < matrix.length; row++) {
     for (let column = 0; column < matrix.length; column++) {
       const value = matrix[row][column];

@@ -1,15 +1,15 @@
-import React, { Component } from "react";
 import shallowEqual from "fbjs/lib/shallowEqual";
+import React, { Component } from "react";
 import createStore, { Store } from "unistore";
 import devtools from "unistore/devtools";
 import { Provider } from "unistore/react";
 
-import { IPoint, IStoreState, Mode } from "./types";
 import { Action, setData } from "./actions";
-import { from as pointSetFrom, toArray } from "./point-set";
-import { from as pointMapFrom } from "./point-map";
 import { Matrix } from "./matrix";
+import { from as pointMapFrom } from "./point-map";
+import { from as pointSetFrom, toArray } from "./point-set";
 import Spreadsheet, { Props as SpreadsheetProps } from "./Spreadsheet";
+import { IPoint, IStoreState, Mode } from "./types";
 
 export { createEmptyMatrix } from "./util";
 
@@ -43,15 +43,20 @@ export default class SpreadsheetStateProvider<
   CellType,
   Value
 > extends Component<IProps<CellType, Value>, IStoreState<CellType>> {
-  store: Store<IStoreState<CellType>>;
-  unsubscribe: Unsubscribe;
-  prevState: IStoreState<CellType>;
+  public store: Store<IStoreState<CellType>>;
+  public unsubscribe: Unsubscribe;
+  public prevState: IStoreState<CellType>;
 
-  static defaultProps = {
+  private static defaultProps = {
+    // tslint:disable-next-line:no-empty
     onChange: () => {},
+    // tslint:disable-next-line:no-empty
     onModeChange: () => {},
+    // tslint:disable-next-line:no-empty
     onSelect: () => {},
+    // tslint:disable-next-line:no-empty
     onActivate: () => {},
+    // tslint:disable-next-line:no-empty
     onCellCommit: () => {}
   };
 
@@ -61,6 +66,7 @@ export default class SpreadsheetStateProvider<
       ...initialState,
       data: this.props.data
     };
+    // tslint:disable-next-line:no-empty
     this.unsubscribe = () => {};
     this.store =
       process.env.NODE_ENV === "production"
@@ -69,13 +75,13 @@ export default class SpreadsheetStateProvider<
     this.prevState = state;
   }
 
-  shouldComponentUpdate(nextProps: IProps<CellType, Value>) {
+  public shouldComponentUpdate(nextProps: IProps<CellType, Value>) {
     const { data, ...rest } = this.props;
     const { data: nextData, ...nextRest } = nextProps;
     return !shallowEqual(rest, nextRest) || nextData !== this.prevState.data;
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     const {
       onChange,
       onModeChange,
@@ -108,7 +114,7 @@ export default class SpreadsheetStateProvider<
     });
   }
 
-  componentDidUpdate() {
+  public componentDidUpdate() {
     if (this.props.data !== this.prevState.data) {
       this.store.setState(
         setData(this.store.getState(), this.props.data) as Partial<Action>
@@ -116,12 +122,12 @@ export default class SpreadsheetStateProvider<
     }
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.unsubscribe();
   }
 
-  render() {
-    const { data, ...rest } = this.props;
+  public render() {
+    const { ...rest } = this.props;
     return (
       <Provider store={this.store}>
         <Spreadsheet {...rest} store={this.store} />

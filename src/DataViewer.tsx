@@ -1,5 +1,5 @@
 import React, { Component, FC, ReactNode } from "react";
-import * as Types from "./types";
+import { ICellComponentProps } from "./types";
 
 type Cell = {
   component?: Component<{
@@ -9,7 +9,7 @@ type Cell = {
   }>;
 };
 
-type Props = Types.ICellComponentProps<Cell, Node> & {
+type Props = ICellComponentProps<Cell, Node> & {
   formulaParser: any; // FormulaParser for hot-formula-parser
 };
 

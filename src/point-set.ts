@@ -3,7 +3,6 @@
  *
  */
 
-import { IPoint } from "./types";
 import {
   from as pointMapFrom,
   has as pointMapHas,
@@ -14,6 +13,7 @@ import {
   size as pointMapSize,
   unset
 } from "./point-map";
+import {IPoint} from "./types";
 
 export type PointSet = PointMap<boolean>;
 
@@ -23,7 +23,7 @@ export interface IDescriptor<T> extends IPoint {
 
 /** Appends a new IPoint to the Set object */
 export const add = (set: PointSet, point: IPoint): PointSet =>
-  pointMapSet(point, true, set);
+         pointMapSet(point, true, set);
 
 /** Removes the IPoint from the Set object */
 export const remove = (set: PointSet, IPoint: IPoint): PointSet =>
@@ -36,7 +36,10 @@ export const has = (set: PointSet, IPoint: IPoint): boolean =>
 /** Returns the number of points in a PointSet object */
 export const size = (set: PointSet) => pointMapSize(set);
 
-/** Applies a function against an accumulator and each IPoint in the set (from left to right) to reduce it to a single value */
+/**
+ * Applies a function against an accumulator and each IPoint in the set (from left to right)
+ * to reduce it to a single value
+ */
 export function reduce<T>(
   func: (_: T, __: IPoint) => T,
   set: PointSet,
@@ -118,7 +121,7 @@ export function onEdge(set: PointSet, point: IPoint): OnEdge {
     return NO_EDGE;
   }
 
-  let hasNot = (rowDelta: number, columnDelta: number) =>
+  const hasNot = (rowDelta: number, columnDelta: number) =>
     !has(set, {
       row: point.row + rowDelta,
       column: point.column + columnDelta
@@ -163,6 +166,7 @@ export function extendEdge(
   return reduce(
     (acc: any, point: any) => {
       if (point[field] === edgeValue) {
+        // tslint:disable-next-line:no-object-literal-type-assertion
         return add(acc, {
           [field]: edgeValue + delta,
           [oppositeField]: point[oppositeField]

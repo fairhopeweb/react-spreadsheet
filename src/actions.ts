@@ -1,6 +1,22 @@
 import { KeyboardEvent } from "react";
 
 import {
+  get as matrixGet,
+  has as matrixHas,
+  inclusiveRange,
+  Matrix,
+  set as matrixSet,
+  unset as matrixUnset
+} from "./matrix";
+import {
+  filter as pointMapFilter,
+  from as pointMapFrom,
+  map as pointMapMap,
+  PointMap,
+  reduce as pointMapReduce,
+  set as pointMapSet
+} from "./point-map";
+import {
   add as pointSetAdd,
   extendEdge as pointSetExtendEdge,
   filter as pointSetFilter,
@@ -14,22 +30,6 @@ import {
   toArray as pointSetToArray
 } from "./point-set";
 import {
-  filter as pointMapFilter,
-  from as pointMapFrom,
-  map as pointMapMap,
-  PointMap,
-  reduce as pointMapReduce,
-  set as pointMapSet
-} from "./point-map";
-import {
-  get as matrixGet,
-  has as matrixHas,
-  inclusiveRange,
-  Matrix,
-  set as matrixSet,
-  unset as matrixUnset
-} from "./matrix";
-import {
   CellBase,
   CellChange,
   IDimensions,
@@ -38,7 +38,7 @@ import {
 } from "./types";
 import { isActive, setCell, updateData } from "./util";
 
-export type Action = <Cell>(
+export type Action = <Cell extends CellBase>(
   state: IStoreState<Cell>,
   data: any,
   active?: any,
@@ -161,7 +161,7 @@ export const cut = (state: IStoreState<any>) => ({
   cut: true
 });
 
-export function paste<Cell>(state: IStoreState<Cell>) {
+export function paste<Cell extends CellBase>(state: IStoreState<Cell>) {
   if (pointSetIsEmpty(state.copied)) {
     return null;
   }
@@ -233,7 +233,7 @@ export function paste<Cell>(state: IStoreState<Cell>) {
   };
 }
 
-export const edit = <Cell>(state: IStoreState<Cell>) => {
+export const edit = <Cell extends CellBase>(state: IStoreState<Cell>) => {
   if (isActiveReadOnly(state)) {
     return null;
   }
@@ -245,7 +245,7 @@ export const view = () => ({
   mode: "view"
 });
 
-export const clear = (state: IStoreState<any>) => {
+export const clear = <Cell extends CellBase>(state: IStoreState<any>) => {
   if (!state.active) {
     return null;
   }
@@ -275,12 +275,12 @@ export const clear = (state: IStoreState<any>) => {
   };
 };
 
-export type KeyDownHandler<Cell> = (
+export type KeyDownHandler<Cell extends CellBase> = (
   state: IStoreState<Cell>,
   event: KeyboardEvent
 ) => Partial<IStoreState<Cell>> | null;
 
-export const go = <CellBase>(
+export const go = <Cell extends CellBase>(
   rowDelta: number,
   columnDelta: number
 ): KeyDownHandler<any> => (state, event) => {
@@ -375,14 +375,17 @@ const isActiveReadOnly = <Cell>(state: IStoreState<Cell>): boolean => {
   return Boolean(activeCell && activeCell.readOnly);
 };
 
-export function keyPress(state: IStoreState<any>, _: KeyboardEvent) {
+export function keyPress<Cell extends CellBase>(
+  state: IStoreState<any>,
+  _: KeyboardEvent
+) {
   if (state.mode === "view" && state.active) {
     return { mode: "edit" };
   }
   return null;
 }
 
-export const getKeyDownHandler = (
+export const getKeyDownHandler = <Cell extends CellBase>(
   state: IStoreState<any>,
   event: KeyboardEvent<HTMLInputElement>
 ) => {

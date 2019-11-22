@@ -1,45 +1,19 @@
-import React, {
-  FC,
-  KeyboardEvent,
-  MouseEvent,
-  PureComponent,
-  SyntheticEvent
-} from "react";
-import { connect } from "unistore/react";
 import * as clipboard from "clipboard-polyfill";
 import {
   columnIndexToLabel,
   Parser as FormulaParser
 } from "hot-formula-parser";
+import React, {
+  Component,
+  FC,
+  KeyboardEvent,
+  MouseEvent,
+  ReactNode,
+  SyntheticEvent
+} from "react";
 import { Store } from "unistore";
-import {
-  DataEditor as DataEditorType,
-  DataViewer as DataViewerType,
-  getBindingsForCell as getBindingsForCellType,
-  getValue,
-  IStoreState,
-  Mode
-} from "./types";
-import Table, { Props as TableProps } from "./Table";
-import Row, { Props as RowProps } from "./Row";
-import { enhance as enhanceCell, StaticProps as CellProps } from "./Cell";
-import DataViewer from "./DataViewer";
-import DataEditor from "./DataEditor";
-import ActiveCell from "./ActiveCell";
-import Selected from "./Selected";
-import Copied from "./Copied";
-import { getBindingsForCell } from "./bindings";
-import { range, writeTextToClipboard } from "./util";
-import { max, min } from "./point-set";
-import {
-  get as getMatrix,
-  getSize,
-  join as joinMatrix,
-  map as mapMatrix,
-  Matrix,
-  slice,
-  toArray
-} from "./matrix";
+import { connect } from "unistore/react";
+
 import {
   copy,
   cut,
@@ -50,7 +24,35 @@ import {
   keyPress,
   paste
 } from "./actions";
+import ActiveCell from "./ActiveCell";
+import { getBindingsForCell } from "./bindings";
+import { enhance as enhancedCell, StaticProps as CellProps } from "./Cell";
+import Copied from "./Copied";
+import DataEditor from "./DataEditor";
+import DataViewer from "./DataViewer";
+import {
+  get as getMatrix,
+  getSize,
+  join as joinMatrix,
+  map as mapMatrix,
+  Matrix,
+  slice,
+  toArray
+} from "./matrix";
+import { max, min } from "./point-set";
+import Row, { Props as RowProps } from "./Row";
+import Selected from "./Selected";
 import "./Spreadsheet.css";
+import Table, { Props as TableProps } from "./Table";
+import {
+  DataEditor as DataEditorType,
+  DataViewer as DataViewerType,
+  getBindingsForCell as getBindingsForCellType,
+  getValue,
+  IStoreState,
+  Mode
+} from "./types";
+import { range, writeTextToClipboard } from "./util";
 
 type DefaultCellType = {
   value: string | number | boolean | null;
@@ -61,6 +63,7 @@ const getValue = ({ data }: { data?: DefaultCellType }) =>
 
 export type Props<CellType, Value> = {
   data: Matrix<CellType>;
+  enhancedCell: any;
   columnLabels?: string[];
   ColumnIndicator?: FC<ColumnIndicatorProps>;
   rowLabels?: string[];
@@ -97,7 +100,7 @@ type State = {
 
 type ColumnIndicatorProps = {
   column: number;
-  label?: string | null;
+  label?: ReactNode | null;
 };
 
 const DefaultColumnIndicator: FC<ColumnIndicatorProps> = ({
@@ -112,49 +115,43 @@ const DefaultColumnIndicator: FC<ColumnIndicatorProps> = ({
 
 type RowIndicatorProps = {
   row: number;
-  label?: string | null;
+  label?: ReactNode | null;
 };
 
-const DefaultRowIndicator: FC<RowIndicatorProps> = ({
-  row,
-  label
-}: RowIndicatorProps) =>
+const DefaultRowIndicator: FC<RowIndicatorProps> = ({ row, label }) =>
   label !== undefined ? <th>{label}</th> : <th>{row + 1}</th>;
 
-interface SpreadsheetProps<CellType, Value>
+interface ISpreadsheetProps<CellType, Value>
   extends Props<CellType, Value>,
     State,
     Handlers {
   data: Matrix<CellType>;
 }
 
-class Spreadsheet<CellType, Value> extends PureComponent<
-  SpreadsheetProps<CellType, Value>
+class Spreadsheet<CellType, Value> extends Component<
+  ISpreadsheetProps<CellType, Value>
 > {
-  static defaultProps = {
+  public static defaultProps = {
     Table,
-    Row,
+    Row: Row as any,
     /** @todo enhance incoming Cell prop */
-    Cell: enhanceCell,
+    Cell: enhancedCell as any,
     DataViewer,
-    DataEditor,
+    DataEditor: DataEditor as any,
     getValue,
     getBindingsForCell
   };
 
-  constructor(props: SpreadsheetProps<CellType, Value>) {
-    super(props);
-  }
-
-  formulaParser = new FormulaParser();
+  public formulaParser = new FormulaParser();
 
   /**
    * Internally used value to check if the copied text match the live objects
    * inside state.copied
    */
-  _clippedText: string | null = null;
+  // tslint:disable-next-line:variable-name
+  public _clippedText: string | null = null;
 
-  clip = () => {
+  private clip = () => {
     const { store, getValue } = this.props;
     const { data, selected } = store.getState();
     const startPoint = min(selected);
@@ -166,18 +163,18 @@ class Spreadsheet<CellType, Value> extends PureComponent<
       if (value === undefined) {
         return "";
       }
-      return getValue({ ...point, data: value as CellType });
+      return getValue({ ...point, data: value });
     }, slicedMatrix);
     const csv = joinMatrix(valueMatrix);
     this._clippedText = csv;
     writeTextToClipboard(csv);
   };
 
-  unclip = () => {
+  private unclip = () => {
     this._clippedText = null;
   };
 
-  isFocused(): boolean {
+  private isFocused(): boolean {
     const { activeElement } = document;
 
     return this.props.mode === "view" && this.root
@@ -185,7 +182,7 @@ class Spreadsheet<CellType, Value> extends PureComponent<
       : false;
   }
 
-  handleCopy = (event: ClipboardEvent) => {
+  private handleCopy = (event: ClipboardEvent) => {
     if (this.isFocused()) {
       event.preventDefault();
       event.stopPropagation();
@@ -194,7 +191,7 @@ class Spreadsheet<CellType, Value> extends PureComponent<
     }
   };
 
-  handlePaste = async (event: ClipboardEvent) => {
+  private handlePaste = async (event: ClipboardEvent) => {
     if (this.props.mode === "view" && this.isFocused()) {
       event.preventDefault();
       event.stopPropagation();
@@ -207,7 +204,7 @@ class Spreadsheet<CellType, Value> extends PureComponent<
     }
   };
 
-  handleCut = (event: ClipboardEvent) => {
+  private handleCut = (event: ClipboardEvent) => {
     if (this.isFocused()) {
       event.preventDefault();
       event.stopPropagation();
@@ -216,13 +213,13 @@ class Spreadsheet<CellType, Value> extends PureComponent<
     }
   };
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     document.removeEventListener("cut", this.handleCut);
     document.removeEventListener("copy", this.handleCopy);
     document.removeEventListener("paste", this.handlePaste);
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     const { store } = this.props;
     document.addEventListener("cut", this.handleCut);
     document.addEventListener("copy", this.handleCopy);
@@ -238,12 +235,12 @@ class Spreadsheet<CellType, Value> extends PureComponent<
         let value;
         /** @todo More sound error, or at least document */
         try {
-          const cell = getMatrix(
+          const cell: DefaultCellType = getMatrix(
             cellCoord.row.index,
             cellCoord.column.index,
             store.getState().data
           );
-          value = getValue({ data: cell as DefaultCellType });
+          value = getValue({ data: cell });
         } catch (error) {
           console.error(error);
         } finally {
@@ -256,7 +253,7 @@ class Spreadsheet<CellType, Value> extends PureComponent<
       (
         startCellCoord: any,
         endCellCoord: any,
-        done: (_?: (string | number | boolean | null)[]) => void
+        done: (_?: Array<string | number | boolean | null>) => void
       ) => {
         const startPoint = {
           row: startCellCoord.row.index,
@@ -275,7 +272,7 @@ class Spreadsheet<CellType, Value> extends PureComponent<
     );
   }
 
-  handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  private handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     const { store, onKeyDown, onKeyDownAction } = this.props;
     if (onKeyDown) {
       onKeyDown(event);
@@ -290,25 +287,25 @@ class Spreadsheet<CellType, Value> extends PureComponent<
     }
   };
 
-  handleMouseUp = () => {
+  private handleMouseUp = () => {
     this.props.onDragEnd?.();
     document.removeEventListener("mouseup", this.handleMouseUp);
   };
 
-  handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+  private handleMouseMove = (event: MouseEvent<HTMLDivElement>) => {
     if (!this.props.store.getState().dragging && event.buttons === 1) {
       this.props.onDragStart?.();
       document.addEventListener("mouseup", this.handleMouseUp);
     }
   };
 
-  root?: HTMLDivElement;
+  public root?: HTMLDivElement;
 
-  handleRoot = (root?: HTMLDivElement) => {
+  public handleRoot = (root?: HTMLDivElement) => {
     this.root = root;
   };
 
-  render() {
+  public render() {
     const {
       Table,
       Row,
@@ -407,9 +404,9 @@ const mapStateToProps = (
 };
 
 export default connect(mapStateToProps, {
-  copy: copy,
-  cut: cut,
-  paste: paste,
+  copy,
+  cut,
+  paste,
   onKeyDownAction: keyDown,
   onKeyPress: keyPress,
   onDragStart: dragStart,

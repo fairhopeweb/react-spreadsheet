@@ -4,7 +4,7 @@ import { range } from "./util";
 export type Props = {
   columns: number;
   hideColumnIndicators?: boolean;
-  children: (ReactNode | ReactNode[])[];
+  children: Array<ReactNode | ReactNode[]>;
 };
 
 const Table: FC<Props> = ({

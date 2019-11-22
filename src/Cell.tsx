@@ -1,10 +1,11 @@
-import React, { MouseEvent, PureComponent, SyntheticEvent } from "react";
 import classnames from "classnames";
+import React, { MouseEvent, PureComponent } from "react";
 import { connect } from "unistore/react";
 
-import { has as hasPointSet } from "./point-set";
-import { get, has as hasPointMap } from "./point-map";
+import { activate, select, setCellDimensions } from "./actions";
 import { get as getMatrix } from "./matrix";
+import { get, has as hasPointMap } from "./point-map";
+import { has as hasPointSet } from "./point-set";
 import {
   CellBase,
   DataViewer,
@@ -14,7 +15,6 @@ import {
   IStoreState,
   Mode
 } from "./types";
-import { activate, select, setCellDimensions } from "./actions";
 import { getOffsetRect, isActive } from "./util";
 
 export type StaticProps<Data, Value> = {
@@ -32,7 +32,7 @@ type State<Data> = {
   dragging: boolean;
   mode: Mode;
   data?: Data;
-  _bindingChanged?: Object;
+  _bindingChanged?: object;
 };
 
 type Handlers = {
@@ -47,13 +47,13 @@ export class Cell<Data extends CellBase, Value> extends PureComponent<
   Props<Data, Value>
 > {
   /** @todo update to new API */
-  root: HTMLElement | null = null;
+  public root: HTMLElement | null = null;
 
-  handleRoot = (root: HTMLElement | null) => {
+  public handleRoot = (root: HTMLElement | null) => {
     this.root = root;
   };
 
-  handleMouseDown = (e: MouseEvent<HTMLTableCellElement>) => {
+  private handleMouseDown = (e: MouseEvent<HTMLTableCellElement>) => {
     const {
       row,
       column,
@@ -75,7 +75,7 @@ export class Cell<Data extends CellBase, Value> extends PureComponent<
     }
   };
 
-  handleMouseOver = (e: SyntheticEvent<any>) => {
+  private handleMouseOver = (e: MouseEvent<HTMLTableCellElement>) => {
     const { row, column, dragging, setCellDimensions, select } = this.props;
     if (dragging) {
       setCellDimensions({ row, column }, getOffsetRect(e.currentTarget));
@@ -83,7 +83,7 @@ export class Cell<Data extends CellBase, Value> extends PureComponent<
     }
   };
 
-  componentDidUpdate() {
+  public componentDidUpdate() {
     const {
       row,
       column,
@@ -100,11 +100,11 @@ export class Cell<Data extends CellBase, Value> extends PureComponent<
     }
   }
 
-  render() {
+  public render() {
     const { row, column, getValue, formulaParser } = this.props;
-    let { DataViewer, data } = this.props;
+    const { DataViewer, data } = this.props;
     if (data && data.DataViewer) {
-      let { DataViewer } = data;
+      const { DataViewer } = data;
     }
 
     return (

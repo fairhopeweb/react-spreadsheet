@@ -1,10 +1,10 @@
 import classnames from "classnames";
 import React from "react";
 
+import "./FloatingRect.css";
 import { onEdge, PointSet, reduce, size } from "./point-set";
 import { IDimensions, IStoreState } from "./types";
 import { getCellDimensions } from "./util";
-import "./FloatingRect.css";
 
 type Props = {
   className?: string;

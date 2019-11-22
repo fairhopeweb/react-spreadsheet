@@ -1,8 +1,8 @@
-import { Component, FC } from "react";
+import { FC, PureComponent, ReactNode } from "react";
 
+import { Matrix } from "./matrix";
 import { PointMap } from "./point-map";
 import { PointSet } from "./point-set";
-import { Matrix } from "./matrix";
 
 export interface IPoint {
   column: number;
@@ -41,10 +41,12 @@ export interface IStoreState<Cell> {
   dragging: boolean;
   lastChanged: IPoint | null;
   bindings: PointMap<PointSet>;
-  lastCommit: null | CellChange<Cell>[];
+  lastCommit: null | Array<CellChange<Cell>>;
 }
 
-export type getValue<Cell, Value> = (_: ICellDescriptor<Cell>) => Value;
+export type getValue<Cell, Value extends ReactNode> = (
+  _: ICellDescriptor<Cell>
+) => Value;
 
 export type getBindingsForCell<Cell> = (cell: Cell) => IPoint[];
 
@@ -53,7 +55,7 @@ export type CellChange<Cell> = {
   nextCell?: Cell;
 };
 
-export type commit<Cell> = (changes: CellChange<Cell>[]) => void;
+export type commit<Cell> = (changes: Array<CellChange<Cell>>) => void;
 
 export interface ICellComponentProps<Cell, Value> extends IPoint {
   cell?: Cell;
@@ -67,4 +69,6 @@ export type DataEditorProps<Cell, Value> = ICellComponentProps<Cell, Value> & {
   onChange: (_: Cell) => void;
 };
 
-export type DataEditor<Cell, Value> = Component<DataEditorProps<Cell, Value>>;
+export type DataEditor<Cell, Value> = PureComponent<
+  DataEditorProps<Cell, Value>
+>;
