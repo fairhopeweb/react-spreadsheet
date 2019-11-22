@@ -58,7 +58,7 @@ export function getColumn<T>(column: number, map: PointMap<T>): T[] {
   return Object.keys(map).map((row: any) => map[row][column]);
 }
 
-const EMPTY: PointMap<any> = {} as any;
+const EMPTY: PointMap<any> = {};
 
 /** Creates a new PointMap instance from an array-like or iterable object. */
 export function from<T>(pairs: Array<[IPoint, T]>): PointMap<T> {

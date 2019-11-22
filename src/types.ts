@@ -5,8 +5,8 @@ import { PointMap } from "./point-map";
 import { PointSet } from "./point-set";
 
 export interface IPoint {
-  column: number;
-  row: number;
+  column?: number;
+  row?: number;
 }
 
 export type CellBase = {

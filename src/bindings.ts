@@ -14,12 +14,14 @@ function isFormulaCell<Cell extends { value?: string }>(cell: Cell): boolean {
 const FORMULA_CELL_REFERENCES = /\$?[A-Z]+\$?[0-9]+/g;
 
 /** @todo move me */
-export function getBindingsForCell<Cell>(cell: Cell): IPoint[] {
+export function getBindingsForCell<Cell>(
+  cell: Cell & { value: string }
+): IPoint[] {
   if (!isFormulaCell(cell)) {
     return [];
   }
 
-  const { value } = cell as Cell & { value: string };
+  const { value } = cell;
   // Get raw cell references from formula
   const match = value.match(FORMULA_CELL_REFERENCES);
   if (!match) {

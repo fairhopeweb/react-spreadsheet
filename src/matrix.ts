@@ -137,7 +137,7 @@ export function map<T, T2>(
       return acc;
     },
     matrix,
-    [] as Matrix<T2>
+    []
   );
 }
 

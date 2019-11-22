@@ -3,6 +3,7 @@
  *
  */
 
+import { ReactNode } from "react";
 import {
   from as pointMapFrom,
   has as pointMapHas,
@@ -13,7 +14,7 @@ import {
   size as pointMapSize,
   unset
 } from "./point-map";
-import {IPoint} from "./types";
+import { IPoint } from "./types";
 
 export type PointSet = PointMap<boolean>;
 
@@ -23,7 +24,7 @@ export interface IDescriptor<T> extends IPoint {
 
 /** Appends a new IPoint to the Set object */
 export const add = (set: PointSet, point: IPoint): PointSet =>
-         pointMapSet(point, true, set);
+  pointMapSet(point, true, set);
 
 /** Removes the IPoint from the Set object */
 export const remove = (set: PointSet, IPoint: IPoint): PointSet =>
@@ -71,7 +72,7 @@ export function filter(func: (_: IPoint) => boolean, set: PointSet): PointSet {
   );
 }
 
-const minKey = (object: { [key: number]: any }): number =>
+const minKey = (object: { [key: number]: ReactNode }): number =>
   Math.min(...(Object.keys(object) as any));
 
 /** Returns the IPoint on the minimal row in the minimal column in the set */
@@ -80,7 +81,7 @@ export function min(set: PointSet): IPoint {
   return { row, column: minKey(set[row]) };
 }
 
-const maxKey = (object: { [key: number]: any }): number =>
+const maxKey = (object: { [key: number]: ReactNode }): number =>
   Math.max(...(Object.keys(object) as any));
 
 /** Returns the IPoint on the maximal row in the maximal column in the set */
@@ -170,7 +171,7 @@ export function extendEdge(
         return add(acc, {
           [field]: edgeValue + delta,
           [oppositeField]: point[oppositeField]
-        } as IPoint);
+        });
       }
       return acc;
     },
