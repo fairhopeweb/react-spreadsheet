@@ -26,7 +26,11 @@ import {
 } from "./actions";
 import ActiveCell from "./ActiveCell";
 import { getBindingsForCell } from "./bindings";
-import { enhance as enhancedCell, StaticProps as CellProps } from "./Cell";
+import {
+  Cell,
+  enhance as enhancedCell,
+  StaticProps as CellProps
+} from "./Cell";
 import Copied from "./Copied";
 import DataEditor from "./DataEditor";
 import DataViewer from "./DataViewer";
@@ -45,7 +49,7 @@ import Selected from "./Selected";
 import "./Spreadsheet.css";
 import Table, { Props as TableProps } from "./Table";
 import {
-  DataEditor as DataEditorType,
+  CellBase,
   DataViewer as DataViewerType,
   getBindingsForCell as getBindingsForCellType,
   getValue,
@@ -61,7 +65,7 @@ type DefaultCellType = {
 const getValue = ({ data }: { data?: DefaultCellType }) =>
   data ? data.value : null;
 
-export type Props<CellType, Value> = {
+export type Props<CellType extends CellBase, Value> = {
   data: Matrix<CellType>;
   enhancedCell: any;
   columnLabels?: string[];
@@ -74,7 +78,7 @@ export type Props<CellType, Value> = {
   Row: FC<RowProps>;
   Cell: FC<CellProps<CellType, Value>>;
   DataViewer: DataViewerType<CellType, Value>;
-  DataEditor: DataEditorType<CellType, Value>;
+  DataEditor: any; // DataEditorType<CellType, Value>;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   getValue: getValue<CellType, Value>;
   getBindingsForCell: getBindingsForCellType<CellType>;
@@ -101,6 +105,11 @@ type State = {
 type ColumnIndicatorProps = {
   column: number;
   label?: ReactNode | null;
+};
+
+const Viewer = ({ getValue, cell }) => {
+  const value = getValue({ data: cell });
+  return <input value={value} onChange={() => false} placeholder="type here" />;
 };
 
 const DefaultColumnIndicator: FC<ColumnIndicatorProps> = ({
@@ -135,9 +144,9 @@ class Spreadsheet<CellType, Value> extends Component<
     Table,
     Row: Row as any,
     /** @todo enhance incoming Cell prop */
-    Cell: enhancedCell as any,
+    Cell: enhancedCell(Cell) as any,
     DataViewer,
-    DataEditor: DataEditor as any,
+    DataEditor,
     getValue,
     getBindingsForCell
   };
@@ -380,6 +389,7 @@ class Spreadsheet<CellType, Value> extends Component<
           ))}
         </Table>
         <ActiveCell
+          // @ts-ignore
           DataEditor={DataEditor}
           getValue={getValue}
           getBindingsForCell={getBindingsForCell}

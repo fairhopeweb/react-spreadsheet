@@ -9,13 +9,16 @@ type Cell = {
   }>;
 };
 
-type Props = ICellComponentProps<Cell, Node> & {
+type Props = ICellComponentProps<Cell, ReactNode> & {
   formulaParser: any; // FormulaParser for hot-formula-parser
 };
 
-const toView = (value: boolean | string | Node) => {
-  if (typeof value === "boolean") {
-    return <div className="boolean">{value ? "TRUE" : "FALSE"}</div>;
+const toView = (value: ReactNode) => {
+  if (value === false) {
+    return <div className="boolean">FALSE</div>;
+  }
+  if (value === true) {
+    return <div className="boolean">TRUE</div>;
   }
 
   return value;
@@ -28,10 +31,7 @@ const DataViewer: FC<Props> = ({
   row,
   formulaParser
 }: Props) => {
-  const rawValue = getValue({ data: cell, column, row }) as
-    | boolean
-    | string
-    | Node;
+  const rawValue = getValue({ data: cell, column, row });
   if (typeof rawValue === "string" && rawValue.startsWith("=")) {
     const { result, error } = formulaParser.parse(rawValue.slice(1));
     return error || toView(result);

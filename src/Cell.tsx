@@ -104,14 +104,14 @@ export class Cell<Data extends CellBase, Value> extends PureComponent<
     const { row, column, getValue, formulaParser } = this.props;
     const { DataViewer, data } = this.props;
     if (data && data.DataViewer) {
-      const { DataViewer } = data;
+      const { DataViewer, ...rest } = data;
     }
 
     return (
       <td
         ref={this.handleRoot}
         className={classnames({
-          readonly: data && data.readOnly
+          readonly: data?.readOnly
         })}
         onMouseOver={this.handleMouseOver}
         onMouseDown={this.handleMouseDown}

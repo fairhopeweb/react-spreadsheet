@@ -1,14 +1,14 @@
-import React, { ChangeEvent, PureComponent } from "react";
+import React, { ChangeEvent, PureComponent, ReactNode } from "react";
 import { DataEditorProps } from "./types";
 import { moveCursorToEnd } from "./util";
 
 type Cell = {
-  value: Node | string;
+  value: ReactNode;
 };
 
 type Value = string | number;
 
-class DataEditor extends PureComponent<DataEditorProps<Cell, Value>, void> {
+class DataEditor extends PureComponent<DataEditorProps<Cell, Value>> {
   public input?: HTMLInputElement;
 
   private static defaultProps = {

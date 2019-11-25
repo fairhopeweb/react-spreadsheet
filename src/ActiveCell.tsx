@@ -25,7 +25,7 @@ interface IProps<Cell, Value> extends IPoint, IDimensions {
   DataEditor: DataEditor<Cell, Value>;
   getValue: getValue<Cell, Value>;
   onChange: (data: Cell) => void;
-  setData: (active: IPoint, data: Cell, bindings: IPoint[]) => void;
+  setCellData: (active: IPoint, data: Cell, bindings: IPoint[]) => void;
   cell: Cell;
   hidden: boolean;
   mode: Mode;
@@ -41,10 +41,10 @@ class ActiveCell<Cell extends CellBase, Value> extends Component<
   public state = { cellBeforeUpdate: null };
 
   private handleChange = (row: number, column: number, cell: Cell) => {
-    const { setData, getBindingsForCell } = this.props;
+    const { setCellData, getBindingsForCell } = this.props;
     const bindings = getBindingsForCell(cell);
 
-    setData({ row, column }, cell, bindings);
+    setCellData({ row, column }, cell, bindings);
   };
 
   // NOTE: Currently all logics here belongs to commit event
@@ -68,7 +68,7 @@ class ActiveCell<Cell extends CellBase, Value> extends Component<
   }
 
   public render() {
-    let { DataEditor } = this.props;
+    const { DataEditor } = this.props;
     const {
       getValue,
       row,
@@ -82,7 +82,7 @@ class ActiveCell<Cell extends CellBase, Value> extends Component<
       mode,
       edit
     } = this.props;
-    DataEditor = (cell && cell.DataEditor) || DataEditor;
+    // DataEditor = (cell && cell.DataEditor) || DataEditor;
     const readOnly = cell && cell.readOnly;
     return hidden ? null : (
       <div

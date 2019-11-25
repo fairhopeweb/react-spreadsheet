@@ -1,4 +1,4 @@
-import { FC, PureComponent, ReactNode } from "react";
+import {ComponentType, FC, PureComponent, ReactNode} from "react";
 
 import { Matrix } from "./matrix";
 import { PointMap } from "./point-map";
@@ -60,7 +60,7 @@ export type commit<Cell> = (changes: Array<CellChange<Cell>>) => void;
 export interface ICellComponentProps<Cell, Value> extends IPoint {
   cell?: Cell;
   getValue: getValue<Cell, Value>;
-  formulaParser: any;
+  formulaParser?: any;
 }
 
 export type DataViewer<Cell, Value> = FC<ICellComponentProps<Cell, Value>>;
@@ -69,6 +69,6 @@ export type DataEditorProps<Cell, Value> = ICellComponentProps<Cell, Value> & {
   onChange: (_: Cell) => void;
 };
 
-export type DataEditor<Cell, Value> = PureComponent<
+export type DataEditor<Cell, Value> = ComponentType<
   DataEditorProps<Cell, Value>
 >;

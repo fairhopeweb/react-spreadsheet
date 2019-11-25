@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 
 export type Props = {
-  children: Array<ReactNode | ReactNode[]>;
+  children: ReactNode;
 };
 
-export default "tr";
+export default ({ children }: Props) => <tr>{children}</tr>;

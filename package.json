@@ -10,11 +10,13 @@
     "sheet",
     "table"
   ],
-  "main": "dist/SpreadsheetStateProvider.js",
+  "main": "dist/SpreadsheetStateProvider.jsx",
   "scripts": {
     "test": "jest",
     "start": "yarn run cosmos",
-    "build": "rm -f dist/*; tsc",
+    "build": "rm -rf ./dist && yarn copy && tsc",
+    "copy": "cpx 'src/*.css' 'dist'",
+    "watch": "tsc --watch",
     "prepack": "cross-env NODE_ENV=production yarn build",
     "push-coverage": "jest --coverage --coverageReporters=text-lcov | coveralls",
     "cosmos": "cosmos",
