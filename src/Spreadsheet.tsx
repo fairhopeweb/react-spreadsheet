@@ -104,18 +104,10 @@ type State = {
 
 type ColumnIndicatorProps = {
   column: number;
-  label?: ReactNode | null;
+  label?: ReactNode;
 };
 
-const Viewer = ({ getValue, cell }) => {
-  const value = getValue({ data: cell });
-  return <input value={value} onChange={() => false} placeholder="type here" />;
-};
-
-const DefaultColumnIndicator: FC<ColumnIndicatorProps> = ({
-  column,
-  label
-}: ColumnIndicatorProps) =>
+const DefaultColumnIndicator: FC<ColumnIndicatorProps> = ({ column, label }) =>
   label !== undefined ? (
     <th>{label}</th>
   ) : (
@@ -124,7 +116,7 @@ const DefaultColumnIndicator: FC<ColumnIndicatorProps> = ({
 
 type RowIndicatorProps = {
   row: number;
-  label?: ReactNode | null;
+  label?: ReactNode;
 };
 
 const DefaultRowIndicator: FC<RowIndicatorProps> = ({ row, label }) =>
@@ -235,12 +227,7 @@ class Spreadsheet<CellType, Value> extends Component<
     document.addEventListener("paste", this.handlePaste);
     this.formulaParser.on(
       "callCellValue",
-      (
-        cellCoord: any,
-        done: (
-          _: string | boolean | number | boolean | null | undefined
-        ) => void
-      ) => {
+      (cellCoord: any, done: (_: ReactNode) => void) => {
         let value;
         /** @todo More sound error, or at least document */
         try {
@@ -414,11 +401,11 @@ const mapStateToProps = (
 };
 
 export default connect(mapStateToProps, {
-  copy,
-  cut,
-  paste,
-  onKeyDownAction: keyDown,
-  onKeyPress: keyPress,
-  onDragStart: dragStart,
-  onDragEnd: dragEnd
+  // copy,
+  // cut,
+  // paste,
+  // onKeyDownAction: keyDown,
+  // onKeyPress: keyPress,
+  // onDragStart: dragStart,
+  // onDragEnd: dragEnd
 })(Spreadsheet);

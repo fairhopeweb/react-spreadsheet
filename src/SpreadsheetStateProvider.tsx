@@ -9,7 +9,7 @@ import { Matrix } from "./matrix";
 import { from as pointMapFrom } from "./point-map";
 import { from as pointSetFrom, toArray } from "./point-set";
 import Spreadsheet, { Props as SpreadsheetProps } from "./Spreadsheet";
-import { IPoint, IStoreState, Mode } from "./types";
+import {CellBase, IPoint, IStoreState, Mode} from "./types";
 
 export { createEmptyMatrix } from "./util";
 
@@ -40,7 +40,7 @@ const initialState: Partial<IStoreState<any>> = {
 };
 
 export default class SpreadsheetStateProvider<
-  CellType,
+  CellType extends CellBase,
   Value
 > extends Component<IProps<CellType, Value>, IStoreState<CellType>> {
   public store: Store<IStoreState<CellType>>;
@@ -114,7 +114,7 @@ export default class SpreadsheetStateProvider<
     });
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: IProps<CellType, Value>) {
     if (this.props.data !== this.prevState.data) {
       this.store.setState(
         setData(this.store.getState(), this.props.data) as Partial<Action>
@@ -128,6 +128,7 @@ export default class SpreadsheetStateProvider<
 
   public render() {
     const { ...rest } = this.props;
+    console.log(this.props.data)
     return (
       <Provider store={this.store}>
         <Spreadsheet {...rest} store={this.store} />

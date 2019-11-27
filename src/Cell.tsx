@@ -102,9 +102,9 @@ export class Cell<Data extends CellBase, Value> extends PureComponent<
 
   public render() {
     const { row, column, getValue, formulaParser } = this.props;
-    const { DataViewer, data } = this.props;
+    let { DataViewer, data } = this.props; // tslint:disable-line:prefer-const
     if (data && data.DataViewer) {
-      const { DataViewer, ...rest } = data;
+      DataViewer = data.DataViewer;
     }
 
     return (
